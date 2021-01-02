@@ -1,6 +1,6 @@
 # Purpose
-Create an Raspberry Pi based roaster control system with Artisan Roasterscope
-front-end. 
+Create a Raspberry Pi based roaster control system for Artisan Roasterscope
+as front-end UI.
 
 # Method
 Using components of the TC4 (MCP3424, MCP9800, 24LC512, k-type thermocouple,
@@ -15,5 +15,5 @@ Raspberry Pi GPIO through a solid state relay(s).
 # Milestones
 1) Temperature data read over I2C
 2) Communication interface between thermocouple system and Artisan
-3) Communication interface between Artisan and 
+3) Communication interface between Artisan and roaster
 
