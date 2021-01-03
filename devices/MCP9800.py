@@ -26,7 +26,7 @@ class MCP9800(object):
     SHIFT_COMP_INTR     = 1     # 1 = Interrupt mode, 0 = Comparator mode (default)
     SHIFT_SHUTDOWN      = 0     # 1 = Enable shutdown, 0 = Disable shutdown (default)
 
-    def __init__(self, bus=None, i2c_id=1, address=0x48, resolution=12):
+    def __init__(self, bus=None, i2c_id=1, address=0x48):
         """
         MCP9800(bus = None, i2c_id = 0, address = 0x48)
 
@@ -49,27 +49,27 @@ class MCP9800(object):
 
     def set_oneshot(self, enable):
         self.oneshot = enable << self.SHIFT_ONE_SHOT
-        self.configure()
+        self.configure('mode')
 
     def set_resolution(self, bit_resolution):
         assert(bit_resolution >= 9 and bit_resolution <= 12)
         self.res = (int(bit_resolution) - 9) << self.SHIFT_ADC_RES
-        self.configure()
+        self.configure('rsln')
 
     def set_alert(self, fault=3, alert_polarity=0, compint=0):
         alert = fault << self.SHIFT_FAULT_QUEUE
         alert |= alert_polarity << self.SHIFT_ALERT_POLARITY
         alert |= compint << self.SHIFT_COMP_INTR
         self.alert = alert
-        self.configure()
+        self.configure('alrt')
 
     def set_shutdown(self, enable):
         self.shutdown = enable << self.SHIFT_SHUTDOWN
-        self.configure()
+        self.configure('sdwn')
 
-    def configure(self):
+    def configure(self, source='init'):
         config = self.oneshot | self.res | self.alert | self.shutdown
-        logger.debug(f'configuration: {bin(config)}')
+        logger.debug(f'configuration: {source} {config:#010b}')
         self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
 
     def read_register(self, register, length):
@@ -88,6 +88,11 @@ if __name__ == "__main__":
     mcp = MCP9800(i2c_id=1, address=0x48)
     mcp.set_oneshot(0)
     mcp.set_resolution(9)
+    mcp.set_alert(3, 1, 1)
+    mcp.set_alert(2, 1, 1)
+    mcp.set_alert(1, 1, 1)
+    mcp.set_alert(0, 1, 1)
+    mcp.set_alert(0, 0, 1)
     mcp.set_alert(0, 0, 0)
     mcp.set_shutdown(0)
     mcp.set_shutdown(1)

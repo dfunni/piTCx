@@ -376,3 +376,9 @@ class MCP342x(object):
             r = aggregate(r)
         return r
 
+if __name__ == '__main__':
+    import smbus2 as smbus
+    logging.basicConfig(level='DEBUG')
+    bus = smbus.SMBus(1)
+    tc0 = MCP342x(bus)
+    print(tc0.convert_and_read() * 1000)
