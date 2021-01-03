@@ -2,11 +2,14 @@ import glob
 import logging
 import smbus2 as smbus
 from devices.MCP342x import MCP342x
+from devices.MCP3424 import MCP3424
 from devices.MCP9800 import MCP9800
+
 import numpy as np
 from numpy.polynomial.polynomial import polyval
 import time
 
+logger = logging.getLogger(__name__)
 
 def get_smbus():
     candidates = []
@@ -69,12 +72,12 @@ def get_temp(tc, amb):
 if __name__ == '__main__':
 
     logging.basicConfig(level='INFO')
-    logger = logging.getLogger(__name__)
 
     bus = get_smbus()
 
-    amb = MCP9800(bus, resolution=12)
-    tc0 = MCP342x(bus, resolution=18, gain=8, channel=0)
+    amb = MCP9800(bus)
+#    tc0 = MCP342x(bus, resolution=18, gain=8, channel=0)
+    tc0 = MCP3424(bus)
     for i in range(10):
         temp_tc0, temp_amb = get_temp(tc0, amb)
         print(f'tc0: {temp_tc0}\tamb: {temp_amb}')
