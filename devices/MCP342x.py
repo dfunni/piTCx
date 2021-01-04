@@ -330,6 +330,7 @@ class MCP342x(object):
                     count = -(~count & count_mask) - 1
                 
                 return count, config_used
+            logger.info(config_used)
                     
     def read(self, scale_factor=None, offset=None, raw=False):
         if scale_factor is None:
