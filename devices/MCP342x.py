@@ -192,6 +192,7 @@ class MCP342x(object):
         self.device = device
         self.scale_factor = scale_factor
         self.offset = offset
+        self.channel = channel
 
         self.set_channel(channel)
         self.set_gain(gain)
@@ -200,8 +201,7 @@ class MCP342x(object):
 
     def __repr__(self):
         addr = hex(self.address)
-        return (type(self).__name__ + ': device=' + self.device 
-                + ', address=' + addr)
+        return (f'{type(self).__name__}: device={self.device}, address={addr}, channel={self.channel}')
 
     def get_bus(self):
         return self.bus
@@ -321,6 +321,7 @@ class MCP342x(object):
                 for i in range(bytes_to_read - 1):
                     count <<= 8
                     count |= d[i]
+                    logger.debug(bin(count))
 
                 sign_bit_mask = 1 << (res - 1)
                 count_mask = sign_bit_mask - 1

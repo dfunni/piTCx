@@ -26,34 +26,56 @@ class MCP9800(object):
     SHIFT_COMP_INTR     = 1     # 1 = Interrupt mode, 0 = Comparator mode (default)
     SHIFT_SHUTDOWN      = 0     # 1 = Enable shutdown, 0 = Disable shutdown (default)
 
-    def __init__(self, bus=None, i2c_id=1, address=0x48):
-        """
-        MCP9800(bus = None, i2c_id = 0, address = 0x48)
+    res_map = {9: 0b00,
+               10: 0b01,
+               11: 0b10,
+               12: 0b11}
 
-        Either call with pre-initialised smbus(-compatible) instance in 'bus'
-        Or with /dev/i2c-<id> device id in 'i2c_id' to open a new bus instance
+    ctime_map = {9: 30e-3,
+                 10: 60e-3,
+                 11: 120e-3,
+                 12: 240e-3}
 
-        Usual MCP980x-family addresses are 0x48 ~ 0x4D
-        """
-        self.address = address
+    def __init__(self, bus=None, i2c_id=1, address=0x48, res=12):
+
         if bus:
             self.bus = bus
         else:
             self.bus = smbus.SMBus(i2c_id)
+        self.address = address
+        self.tc_type = 'ref' 
+        resb = self.res_map.get(res, 12)
+        self.convert_time = self.ctime_map.get(res, 12)
 
-        self.oneshot = 0b1 << self.SHIFT_ONE_SHOT
-        self.res = 0b11 << self.SHIFT_ADC_RES
+        self.oneshot = 0b0 << self.SHIFT_ONE_SHOT # initial oneshot mode
+        self.res = resb << self.SHIFT_ADC_RES
         self.alert = 0b1100 << self.SHIFT_COMP_INTR
         self.shutdown = 0b1 << self.SHIFT_SHUTDOWN
-        self.configure()
+        try:
+            self.configure()
+        except:
+            time.sleep(1)
+            self.configure()
+
+    def configure(self, source='init'):
+        config = self.oneshot | self.res | self.alert | self.shutdown
+        logger.debug(f'configuration: {source} {config:#010b}')
+        self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
+
+    def convert(self):
+        self.oneshot = 0b1 << self.SHIFT_ONE_SHOT # initial oneshot mode
+        self.shutdown = 0b1 << self.SHIFT_SHUTDOWN
+        self.configure('convert')
+        pass
 
     def set_oneshot(self, enable):
         self.oneshot = enable << self.SHIFT_ONE_SHOT
         self.configure('mode')
 
     def set_resolution(self, bit_resolution):
-        assert(bit_resolution >= 9 and bit_resolution <= 12)
-        self.res = (int(bit_resolution) - 9) << self.SHIFT_ADC_RES
+        resb = self.res_map.get(bit_resolution, 12)
+        self.convert_time = self.ctime_map.get(bit_resolution, 12)
+        self.res = resb << self.SHIFT_ADC_RES
         self.configure('rsln')
 
     def set_alert(self, fault=3, alert_polarity=0, compint=0):
@@ -67,39 +89,27 @@ class MCP9800(object):
         self.shutdown = enable << self.SHIFT_SHUTDOWN
         self.configure('sdwn')
 
-    def configure(self, source='init'):
-        config = self.oneshot | self.res | self.alert | self.shutdown
-        logger.debug(f'configuration: {source} {config:#010b}')
-        self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
-
     def read_register(self, register, length):
         data = self.bus.read_i2c_block_data(self.address, register, length)
         return data
 
-    def read_temperature(self):
+    def read(self):
         temp = self.read_register(self.REG_TEMP, 2)
         if len(temp) < 2:
-            return None
+            logger.warning("bad read" + bin(temp))
+            return  None
         return float((temp[0]<<8) + temp[1])/(2**8)
+
+    def convert_and_read(self):
+        self.convert()
+        time.sleep(self.convert_time)
+        return self.read()
 
 
 if __name__ == "__main__":
     logging.basicConfig(level='DEBUG')
-    mcp = MCP9800(i2c_id=1, address=0x48)
-    mcp.set_oneshot(0)
-    mcp.set_resolution(9)
-    mcp.set_alert(3, 1, 1)
-    mcp.set_alert(2, 1, 1)
-    mcp.set_alert(1, 1, 1)
-    mcp.set_alert(0, 1, 1)
-    mcp.set_alert(0, 0, 1)
-    mcp.set_alert(0, 0, 0)
-    mcp.set_shutdown(0)
-    mcp.set_shutdown(1)
-    mcp.set_oneshot(1)
-    mcp.set_resolution(12)
-    mcp.set_alert(3, 1, 1)
+    mcp = MCP9800()
     #data = mcp.read_register(MCP9800.REG_CONFIG, 1)
     # print(f"CONF: {bin(data[0])}")
-    print("Temperature: %.1f" % mcp.read_temperature())
+    print("Temperature: %.1f" % mcp.convert_and_read())
 

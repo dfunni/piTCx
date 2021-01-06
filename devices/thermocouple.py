@@ -1,4 +1,5 @@
 import logging
+import time
 from numpy.polynomial.polynomial import polyval
 
 
@@ -6,9 +7,9 @@ logger = logging.getLogger(__name__)
 
 temp_range = 'low'
 
-def v_to_C(v, temp_range):
+def v2c(v, tc_type, T_range):
 
-    coef_inv = {
+    K_inv = {
         'neg': [0, 
                 2.5173462e1,
                 -1.1662878,
@@ -35,14 +36,43 @@ def v_to_C(v, temp_range):
                 -9.650715e-4,
                 8.802193e-6,
                 -3.110810e-8],
-                }
+            }
 
-    return polyval(v*1000, coef_inv[temp_range])
+    coef_inv = {'k_type': K_inv}
 
-def read_temp(adc, amb): 
-    v = adc.convert_and_read()
-    C = v_to_C(v, 'low')
-    amb_temp = amb.read_temperature()
-    logger.debug(f'voltage: {v}; temp: {C}, amb: {amb_temp}')
+    coefs = coef_inv.get(tc_type, K_inv)
+    coefs = coefs.get(T_range, 'low')
+    
+    return polyval(v*1000, coefs)
 
-    return (C + amb_temp), amb_temp
+
+def C_to_F(degCs):
+    return [round(reading*1.8 + 32, 2) for reading in degCs]
+    
+def read_temps(dev_dict, T_range='low'): 
+
+    amb = dev_dict.get('amb')
+    tcs = dev_dict.get('tcs')
+    used_tcs = [i for i in tcs if i != None]
+
+    tc_convert_time = len(used_tcs) * used_tcs[0].convert_time
+    dly = max(amb.convert_time - tc_convert_time, 0)
+
+    amb.convert()
+    reads = [(dev.convert_and_read(), dev.tc_type) for dev in used_tcs]
+    if dly:
+        time.sleep(dly)
+    Tamb = amb.read()
+    Ts_C = [Tamb]
+    for i, tc in enumerate(tcs):
+        j = 0
+        if tc != None:
+            v, t = reads[j]
+            j += 1
+            Ts_C.append(round((v2c(v, t, 'low') + Tamb), 4))
+        else:
+            Ts_C.append(0)
+
+    Ts_F = C_to_F(Ts_C)
+    return Ts_C, Ts_F, dly
+
