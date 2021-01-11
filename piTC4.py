@@ -124,7 +124,7 @@ class piTC4(object):
 
     def handle_IO3(self):
         '''For DC fan control, TODO
-        Command of type: OT2;100
+        Command of type: IO3;100
         '''
         self.dc_fan_duty = self.cmd[1]
         self.IO3.value = float(self.dc_fan_duty) / 100.0
