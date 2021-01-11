@@ -64,12 +64,12 @@ def read_temps(dev_dict, T_range='low'):
         time.sleep(dly)
     Tamb = amb.read()
     Ts_C = [Tamb]
-    for i, tc in enumerate(tcs):
-        j = 0
+    j = 0
+    for tc in tcs:
         if tc != None:
             v, t = reads[j]
-            j += 1
             Ts_C.append(round((v2c(v, t, 'low') + Tamb), 4))
+            j += 1
         else:
             Ts_C.append(0)
 
