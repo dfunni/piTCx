@@ -1,7 +1,6 @@
 RPi_pin, TC4, DEFAULT, CONFIG_PWM, CONFIG_PAC
 GPIO02, SDA, ---, ---, ---
 GPIO03, CLK, ---, ---, ---
-GPIO04, OT1, HTR, HTR, HTR
-GPIO14, OT2, ---, ---, FAN
-GPIO18, IO2, ---, ---, ZCD
-GPIO15, IO3, ---, FAN, --- 
+GPIO18, OT1, HTR, HTR, HTR
+GPIO19, OT2, ---, FAN, FAN
+GPIO22, IO2, ---, ---, ZCD
