@@ -17,3 +17,14 @@ Raspberry Pi GPIO through a solid state relay(s).
 2) Communication interface between thermocouple system and Artisan
 3) Communication interface between Artisan and roaster
 
+# Raspberry Pi Setup
+- Ensure hardware serial is enabled in raspi-config
+- Stop the getty service for /dev/ttyAMA0
+
+    sudo systemctl disable serial-getty@ttyAMA0.service
+
+- Add the following line to the end of /boot/config.txt
+
+    dtoverlay=pi3-miniuart-bt
+
+
