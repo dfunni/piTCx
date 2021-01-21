@@ -1,0 +1,72 @@
+---
+- Config 1.A:
+    Computer: laptop
+    Arduino: Nano Every (5V)
+    AC/DC converter: False 
+    Comm: USB
+    PC Power: battery
+    Arduino Power: Vbus
+    VDD mode: 5V
+    Fan Power: Arduino 5V
+
+- Config 1.B:
+    Computer: laptop
+    Arduino: Nano Every (5V)
+    AC/DC converter: True
+    Comm: USB
+    PC Power: battery
+    Arduino Power: 120VAC/5VDC -> VIN
+    VDD mode: 5V
+    Fan Power: 120VAC/5VDC
+
+- Config 2.A:
+    Computer: laptop
+    Arduino: Nano 33 (3V3)
+    AC/DC converter: False
+    Comm: USB
+    PC Power: battery
+    Arduino Power: Vbus
+    VDD mode: 3V3
+    Fan Power: Arduino 5V w/ vbus jumper shorted
+
+- Config 2.B:
+    Computer: laptop
+    Arduino: Nano 33 (3V3)
+    AC/DC converter: True
+    Comm: USB
+    PC Power: battery
+    Arduino Power: 120VAC/5VDC -> VIN
+    VDD mode: 3V3
+    Fan Power: 120VAC/5VDC
+
+- Config 3:
+    Computer: Raspberry Pi
+    Arduino: Nano 33 (3V3)
+    AC/DC converter: True
+    Comm: TX/RX
+    Raspi Power: 120VAC/5VDC -> 5V
+    Arduino Power: 120VAC/5VDC -> VIN
+    VDD mode: 3V3
+    Fan Power: 120VAC/5VDC
+
+- Config 4:
+    Computer: Raspberry Pi
+    Arduino: None
+    AC/DC converter: True
+    Comm: pty
+    Raspi Power: 120VAC/5VDC -> 5V
+    Arduino Power: N/A
+    VDD mode: 3V3
+    Fan Power: 120VAC/5VDC
+
+# Still in development
+- Config 5:
+    Computer: laptop
+    Arduino: Nano 33 IoT (3V3)
+    AC/DC converter: True
+    Comm: WIFI
+    PC Power: battery
+    Arduino Power: 120VAC/5VDC -> VIN
+    VDD mode: 3V3
+    Fan Power: 120VAC/5VDC
+...
