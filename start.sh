@@ -7,5 +7,5 @@ sudo chmod 660 $PTYs
 sudo chmod 660 $PTYc 
 sudo pigpiod -s 10
 artisan &
-python piTC4.py
+python TCx.py
 

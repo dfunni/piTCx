@@ -6,8 +6,7 @@ import smbus2 as smbus
 from gpiozero import PWMOutputDevice
 from gpiozero.pins.pigpio import PiGPIOFactory
 
-from devices.MCP3424 import MCP3424
-from devices.MCP9800 import MCP9800
+from devices import MCP342x, MCP9800
 from devices import thermocouple as tc
 
 logger = logging.getLogger(__name__) 
@@ -22,10 +21,10 @@ class piTC4(object):
 
         self.amb = MCP9800(self.bus)
         # ADC channels
-        self.c0 = MCP3424(self.bus, chan=0, tc_type='k_type')
-        self.c1 = MCP3424(self.bus, chan=1, tc_type='k_type')
-        self.c2 = MCP3424(self.bus, chan=2, tc_type='k_type')
-        self.c3 = MCP3424(self.bus, chan=3, tc_type='k_type')
+        self.c0 = MCP342x(self.bus, chan=0, tc_type='k_type')
+        self.c1 = MCP342x(self.bus, chan=1, tc_type='k_type')
+        self.c2 = MCP342x(self.bus, chan=2, tc_type='k_type')
+        self.c3 = MCP342x(self.bus, chan=3, tc_type='k_type')
 
         self.handler_dict = {'READ': self.handle_READ,
                              'CHAN': self.handle_CHAN,

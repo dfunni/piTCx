@@ -4,9 +4,9 @@ import smbus2 as smbus
 
 logger = logging.getLogger(__name__)
 
-class MCP3424(object):
+class MCP342x(object):
     """
-    Class to represent MCP3424 ADC.
+    Class to represent MCP342x ADC.
     """
     SHIFT_NRDY = 7
     SHIFT_CHAN = 5
