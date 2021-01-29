@@ -1,3 +1,3 @@
-from ADC.py import MCP342x
-import MCP9800.py
-import thermocouple.py
+from .MCP342x import MCP342x
+from .MCP9800 import MCP9800
+
