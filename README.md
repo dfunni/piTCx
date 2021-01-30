@@ -26,14 +26,14 @@ dtoverlay=pi3-miniuart-bt
 # Artisan Setup
 
 # Testing TCx on standalone Raspberry Pi
-- Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
+1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section.
-- Open two terminals.
-- In the first terminal, navigate to the TCx directory and run:
+2. Open two terminals.
+3. In the first terminal, navigate to the TCx directory and run:
 ```
 ./start_test.sh
 ```
-- In the second termial, navigate the the TCx directory and run:
+4. In the second termial, navigate the the TCx directory and run:
 ```
 ./test/test.sh
 ```
