@@ -1,16 +1,15 @@
 # TCx
-TCx is a Raspberry Pi based roaster control system for Artisan Roasterscope
+TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope
 as front-end UI. A standalone Raspberry Pi can interface with any TCx board 
 (original TC4, TCsolo, or TCduo) to record temperatures from up to four
-thermocouples as well as the temperature sensor (MCP9800) on the TCx board. 
-For roaster control, the Raspberry pi can perform temperature control using
-slow PWM (1 Hz).
+thermocouples as well as the ambient temperature sensor (MCP9800) on the TCx board. 
+For roaster control, the Raspberry pi can perform heater control using slow PWM (1 Hz).
 
 Additionally, the Raspberry Pi can interface with an Arduino (3.3 V variant)
-using serial over GPIO pins 14 and 15 (Broadcom pins 8 and 10). This can be
-used for fast PWM control of heater as well as phase angle control of an AC
-fan. For PAC fan control, the arduino hardware interrupt (DIO2) must be used to
-monitor zero cross detecting circuitry to control a random fire SSR on the TCx
+using serial commands over GPIO pins 14 and 15 (Broadcom pins 8 and 10). This allows 
+for fast PWM control of heater as well as phase angle control of an AC
+fan. For PAC fan control, the Arduino hardware interrupt (DIO2) must be used to
+monitor zero cross detecting circuitry and control a random fire SSR on the TCx
 OT2 pin.
 
 # Raspberry Pi Setup
