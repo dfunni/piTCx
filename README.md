@@ -29,18 +29,18 @@ dtoverlay=pi3-miniuart-bt
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section.
 2. Open two terminals.
-3. In the first terminal, navigate to the TCx directory and run:
+3. In the first terminal, navigate to the .../TCx/test/ directory and run:
 ```
 ./start_test.sh
 ```
-4. In the second termial, navigate the the TCx directory and run:
+4. In the second termial, navigate the the .../TCx/test/ directory and run:
 ```
-./test/test.sh
+./test.sh
 ```
 to initiate a default test of the full functionality of the TCx software.
 Alternately, a single Artisan command can be executed with:
 ```
-./test/ArtisonCMD.sh <command> [<value>]
+./ArtisonCMD.sh <command> [<value>]
 ```
  using a command value pair from the following:
 | command | value | notes |

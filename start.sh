@@ -1,3 +1,4 @@
+#!/bin/bash
 source env/bin/ctivate
 (sudo socat pty,rawer,echo=0,link=/dev/ttyS90,group=dialout pty,rawer,echo=0,link=/dev/ttyS91,group=dialout) &
 PTYs="readlink -f /dev/ttyS90"
