@@ -42,7 +42,7 @@ Alternately, a single Artisan command can be executed with:
 ```
 ./test/ArtisonCMD.sh <command> [<value>]
 ```
-with a command value pair from the following:
+ using a command value pair from the following:
 | command | value | notes |
 | ------- | ----- | ----- |
 | CHAN    | 1234  | Initializes the TCx and sets order of ADC channels |
