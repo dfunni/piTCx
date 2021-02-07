@@ -48,13 +48,16 @@ class MCP342x(object):
                  address=0x68, 
                  tc_type=None,
                  chan=0b00, 
-                 pga=8):
+                 pga=8,
+                 res=18):
+
         if bus:
             self.bus = bus
         else:
             self.bus = smbus.SMBus(i2c_id)
         self.address = address
         self.tc_type = tc_type
+        self.res = res
         self.nrdy = 0b0 << self.SHIFT_NRDY
         self.chan = chan << self.SHIFT_CHAN
         self.mode = 0b0 << self.SHIFT_MODE
@@ -97,6 +100,7 @@ class MCP342x(object):
         self.lsb = self.lsb_map.get(rsln, 18)
         self.nbytes = self.nbytes_map.get(rsln, 18)
         self.convert_time = self.convert_map(rsln, 18)
+        self.res = rsln
         self.configure('rsln')
 
     def set_gain(self, pga):
@@ -116,13 +120,13 @@ class MCP342x(object):
                 for i in range(self.nbytes - 1): # read data not config
                     count <<= 8
                     count |= d[i]
-                sign_bit_mask = 1 << (self.rsln - 1)
+                sign_bit_mask = 1 << (self.res - 1)
                 count_mask = sign_bit_mask - 1
                 sign_bit = count & sign_bit_mask
                 count &= count_mask
                 if sign_bit:
                     count = -(~count & count_mask) - 1
-                
+                logger.debug(f'count: {bin(count)}, sign_bit: {bin(sign_bit)}')
                 return count, config_used
                     
     def read(self, raw=False):
@@ -136,9 +140,7 @@ class MCP342x(object):
         voltage = count * self.lsb / self.pga 
         return voltage
 
-    def convert_and_read(self, 
-                         samples=None,
-                         **kwargs):
+    def convert_and_read(self, samples=None, **kwargs):
         if samples is not None:
             r = [0] * samples
         for sn in ([0] if samples is None else range(samples)):
