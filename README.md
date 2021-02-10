@@ -28,12 +28,12 @@ Create systemd unit file at `/lib/systemd/system/TCx.service` with the
 following:
 ```
 [Unit]
-Description=Initialize TCx
+Desciption=TCx
 After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=$HOME/TCx/start.sh &>> $HOME/tcx.log 2>&1
+ExecStart=/home/pi/TCx/start.sh &>> /home/pi/tcx.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
@@ -50,7 +50,7 @@ Create systemd unit file at `/lib/systemd/system/artisan.service` with the
 following:
 ```
 [Unit]
-Description=Initialize TCx
+Desciption=Initialize TCx
 After=graphical.target
 
 [Service]
