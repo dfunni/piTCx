@@ -33,7 +33,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/home/pi/TCx/start.sh &>> /home/pi/tcx.log 2>&1
+ExecStart=/home/pi/TCx/start.sh &>> /home/pi/tcx.log
 
 [Install]
 WantedBy=multi-user.target
