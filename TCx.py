@@ -36,7 +36,8 @@ class TCx(object):
                              'OT1': self.handle_OT1,
                              'OT2': self.handle_OT2,
                              'IO2': self.handle_IO2,
-                             'IO3': self.handle_IO3,}
+                             'IO3': self.handle_IO3,
+                             'FILT': self.handle_FILT,}
 
         self.units = "C" # temperature units
         self.setting34 = False # TC channels 3/4 expected from Artisan
@@ -57,6 +58,10 @@ class TCx(object):
         self.OT2 = PWMOutputDevice(pin=self.OT2pin, pin_factory=factory)
         self.IO2 = PWMOutputDevice(pin=self.IO2pin, pin_factory=factory)
 
+        # variables for filter
+        self.filt = [0] * 4
+        self.prev_temps = [0] * 4
+
     def handle_command(self, cmd):
         '''Parses Artisan commands and takes appropriate action
         '''
@@ -72,6 +77,7 @@ class TCx(object):
             t0 = time.time()
             T_Cs, T_Fs, dly  = tc.read_temps(self.dev_dict)
             Ts = T_Fs if self.units == 'F' else T_Cs
+            Ts = self.dofilter(Ts)
             AT = Ts[0]
             T_str = ','.join([f'{T}' for T in Ts[1:]])
             HT = self.heater_duty
@@ -82,6 +88,13 @@ class TCx(object):
             logger.info(f'READ: temps - {temps} dt: {round(time.time()-t0,4)}')
         else: # if CHAN command has not been read yet
             pass
+
+    def handle_FILT(self):
+        '''Sets the filter values to a list of floats between 0 and 1
+        Command of type: FILT;70;70;70;70
+        '''
+        filts = str(self.cmd[1]).split(',')
+        self.filt = [int(i)/100.0 for i in filts]
 
     def handle_CHAN(self):
         '''Initializes TC4, sets up channels for ET and BT
@@ -156,6 +169,16 @@ class TCx(object):
     def handle_UNK(self):
         '''All other commands'''
         logger.warning(f'Unknown command: {self.cmd}')
+
+    def dofilter(self, temps):
+        '''Simple IIR filter over all temperatures read:
+                y[k] = y[k-1]*f - x[k]*(1-f)
+        where f is the filter value between 0 and 1
+        '''
+        tmp = [self.prev_temps[i]*self.filt[i] for i, temp in enumerate(temps)]
+        y = [tmp[i] + temp*(1-self.filt[i]) for i, temp in enumerate(temps)]
+        self.prev_temps = y
+        return y
 
 
 if __name__ == '__main__':
