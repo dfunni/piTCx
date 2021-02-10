@@ -55,7 +55,9 @@ After=graphical.target
 
 [Service]
 Type=idle
-ExecStart=/bin/artisan &
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/pi/.Xauthority"
+ExecStart=/bin/artisan
 
 [Install]
 WantedBy=graphical.target
