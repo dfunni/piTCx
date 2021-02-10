@@ -6,7 +6,5 @@ PTYc="readlink -f /dev/ttyS91"
 sleep 1
 sudo chmod 660 $PTYs
 sudo chmod 660 $PTYc 
-# sudo pigpiod -s 10
-# artisan &
 python $HOME/TCx/TCx.py
 

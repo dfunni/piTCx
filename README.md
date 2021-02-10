@@ -13,14 +13,54 @@ monitor zero cross detecting circuitry and control a random fire SSR on the TCx
 OT2 pin.
 
 # Raspberry Pi Setup
-- Ensure hardware serial is enabled in raspi-config
-- Stop the getty service for /dev/ttyAMA0
+## Serial communication setup
+1. Ensure hardware serial is enabled in raspi-config
+2. Stop the getty service for /dev/ttyAMA0
 ```
 sudo systemctl disable serial-getty@ttyAMA0.service
 ```
-- Add the following line to the end of /boot/config.txt
+3. Add the following line to the end of /boot/config.txt
 ```
 dtoverlay=pi3-miniuart-bt
+```
+## Launch TCx communication on boot
+Create systemd unit file at `/lib/systemd/system/TCx.servic` with the
+following:
+```
+[Unit]
+Desciption=Initialize TCx
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=$HOME/TCx/start.sh &>> $HOME/tcx.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
+```
+After creating the file run
+```
+sudo chmod 644 /lib/systemd/system/TCx.servic
+```
+
+## Launch Artisan on boot
+Create systemd unit file at `/lib/systemd/system/artisan.servic` with the
+following:
+```
+[Unit]
+Desciption=Initialize TCx
+After=graphical.target
+
+[Service]
+Type=idle
+ExecStart=artisan &
+
+[Install]
+WantedBy=graphical.target
+```
+After creating the file run
+```
+sudo chmod 644 /lib/systemd/system/artisan.servic
 ```
 
 # Artisan Setup
