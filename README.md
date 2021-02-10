@@ -41,6 +41,8 @@ WantedBy=multi-user.target
 After creating the file run
 ```
 sudo chmod 644 /lib/systemd/system/TCx.service
+sudo systemctl daemon-reload
+sudo systemctl enable TCx.service
 ```
 
 ## Launch Artisan on boot
@@ -61,6 +63,8 @@ WantedBy=graphical.target
 After creating the file run
 ```
 sudo chmod 644 /lib/systemd/system/artisan.service
+sudo systemctl daemon-reload
+sudo systemctl enable artisan.service
 ```
 
 # Artisan Setup
