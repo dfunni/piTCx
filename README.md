@@ -24,7 +24,7 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 dtoverlay=pi3-miniuart-bt
 ```
 ## Launch TCx communication on boot
-Create systemd unit file at `/lib/systemd/system/TCx.servic` with the
+Create systemd unit file at `/lib/systemd/system/TCx.service` with the
 following:
 ```
 [Unit]
@@ -40,11 +40,11 @@ WantedBy=multi-user.target
 ```
 After creating the file run
 ```
-sudo chmod 644 /lib/systemd/system/TCx.servic
+sudo chmod 644 /lib/systemd/system/TCx.service
 ```
 
 ## Launch Artisan on boot
-Create systemd unit file at `/lib/systemd/system/artisan.servic` with the
+Create systemd unit file at `/lib/systemd/system/artisan.service` with the
 following:
 ```
 [Unit]
@@ -60,7 +60,7 @@ WantedBy=graphical.target
 ```
 After creating the file run
 ```
-sudo chmod 644 /lib/systemd/system/artisan.servic
+sudo chmod 644 /lib/systemd/system/artisan.service
 ```
 
 # Artisan Setup
