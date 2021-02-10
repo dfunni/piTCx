@@ -28,7 +28,7 @@ Create systemd unit file at `/lib/systemd/system/TCx.service` with the
 following:
 ```
 [Unit]
-Desciption=Initialize TCx
+Description=Initialize TCx
 After=multi-user.target
 
 [Service]
@@ -50,7 +50,7 @@ Create systemd unit file at `/lib/systemd/system/artisan.service` with the
 following:
 ```
 [Unit]
-Desciption=Initialize TCx
+Description=Initialize TCx
 After=graphical.target
 
 [Service]
