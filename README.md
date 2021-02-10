@@ -23,7 +23,7 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 dtoverlay=pi3-miniuart-bt
 ```
-## Launch TCx communication on boot
+## Launch TCx on boot
 Create systemd unit file at `/lib/systemd/system/TCx.service` with the
 following:
 ```
