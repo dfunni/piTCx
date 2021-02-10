@@ -50,12 +50,12 @@ Create systemd unit file at `/lib/systemd/system/artisan.service` with the
 following:
 ```
 [Unit]
-Desciption=Initialize TCx
+Description=artisan roasterscope
 After=graphical.target
 
 [Service]
 Type=idle
-ExecStart=artisan &
+ExecStart=/bin/artisan &
 
 [Install]
 WantedBy=graphical.target
