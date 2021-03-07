@@ -44,7 +44,7 @@ class TCx(object):
         self.isinit = False # ensure CHAN before READ
 
         # GPIO setup
-        with open("/home/pi/Documents/projects/TCx/config.yml", 'r') as ymlfile:
+        with open("/home/pi/TCx/config.yml", 'r') as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader).get(config, 'DEFAULT')
         self.OT1pin = cfg['pOT1']
         self.OT2pin = cfg['pOT2']

@@ -23,45 +23,19 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 dtoverlay=pi3-miniuart-bt
 ```
-## Launch TCx communication on boot
-Create systemd unit file at `/lib/systemd/system/TCx.service` with the
-following:
-```
-[Unit]
-Desciption=Initialize TCx
-After=multi-user.target
+## Launch start.sh on boot
+Edit crontab with:
 
-[Service]
-Type=idle
-ExecStart=$HOME/TCx/start.sh &>> $HOME/tcx.log 2>&1
+    crontab -e
 
-[Install]
-WantedBy=multi-user.target
-```
-After creating the file run
-```
-sudo chmod 644 /lib/systemd/system/TCx.service
-```
+and add the following line:
+
+    @reboot $HOME/TCx/start.sh
 
 ## Launch Artisan on boot
-Create systemd unit file at `/lib/systemd/system/artisan.service` with the
-following:
-```
-[Unit]
-Desciption=Initialize TCx
-After=graphical.target
+Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
-[Service]
-Type=idle
-ExecStart=artisan &
-
-[Install]
-WantedBy=graphical.target
-```
-After creating the file run
-```
-sudo chmod 644 /lib/systemd/system/artisan.service
-```
+    sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
 
 # Artisan Setup
 
