@@ -37,7 +37,8 @@ class TCx(object):
                              'OT2': self.handle_OT2,
                              'IO2': self.handle_IO2,
                              'IO3': self.handle_IO3,
-                             'FILT': self.handle_FILT,}
+                             'FILT': self.handle_FILT,
+                             'BUTTON':self.handle_BUTTON,}
 
         self.units = "C" # temperature units
         self.setting34 = False # TC channels 3/4 expected from Artisan
@@ -166,6 +167,12 @@ class TCx(object):
         '''
         logger.info(f'IO3: {self.cmd[1]}')
 
+    def handle_BUTTON(self):
+        '''Log Artisan button presses
+        Command of type: BUTTON;START
+        '''
+        logger.info(f'BUTTON: {self.cmd[1]}')
+        
     def handle_UNK(self):
         '''All other commands'''
         logger.warning(f'Unknown command: {self.cmd}')
