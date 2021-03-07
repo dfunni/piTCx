@@ -23,7 +23,7 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 dtoverlay=pi3-miniuart-bt
 ```
-<<<<<<< HEAD
+
 ## Launch start.sh on boot
 Edit crontab with:
 
@@ -37,7 +37,7 @@ and add the following line:
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
     sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
-=======
+
 ## Launch TCx on boot
 Create systemd unit file at `/lib/systemd/system/TCx.service` with the
 following:
