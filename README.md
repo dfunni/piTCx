@@ -23,6 +23,7 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 dtoverlay=pi3-miniuart-bt
 ```
+<<<<<<< HEAD
 ## Launch start.sh on boot
 Edit crontab with:
 
@@ -36,6 +37,53 @@ and add the following line:
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
     sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
+=======
+## Launch TCx on boot
+Create systemd unit file at `/lib/systemd/system/TCx.service` with the
+following:
+```
+[Unit]
+Desciption=TCx
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/TCx/start.sh &>> /home/pi/tcx.log
+
+[Install]
+WantedBy=multi-user.target
+```
+After creating the file run
+```
+sudo chmod 644 /lib/systemd/system/TCx.service
+sudo systemctl daemon-reload
+sudo systemctl enable TCx.service
+```
+
+## Launch Artisan on boot
+Create systemd unit file at `/lib/systemd/system/artisan.service` with the
+following:
+```
+[Unit]
+Description=artisan roasterscope
+After=graphical.target
+
+[Service]
+Type=idle
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/pi/.Xauthority"
+ExecStart=/bin/artisan
+
+[Install]
+WantedBy=graphical.target
+```
+After creating the file run
+```
+sudo chmod 644 /lib/systemd/system/artisan.service
+sudo systemctl daemon-reload
+sudo systemctl enable artisan.service
+```
+>>>>>>> 79a9160655435ff09b6b76514ed6f0a76ca6ef14
 
 # Artisan Setup
 
