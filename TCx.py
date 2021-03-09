@@ -86,7 +86,7 @@ class TCx(object):
             SV = 0
             temps = f'{AT},{T_str},{HT},{FN},{SV}'
             self.ser.write(bytes(temps, 'ascii'))
-            logger.info(f'READ: temps - {temps} dt: {round(time.time()-t0,4)}')
+            logger.info(f'{time.time()}:{self.cmd}:{temps}')
         else: # if CHAN command has not been read yet
             pass
 
@@ -96,6 +96,7 @@ class TCx(object):
         '''
         filts = str(self.cmd[1]).split(',')
         self.filt = [int(i)/100.0 for i in filts]
+        logger.info(f'{time.time()}:{self.cmd}:{self.filt}') 
 
     def handle_CHAN(self):
         '''Initializes TC4, sets up channels for ET and BT
@@ -108,7 +109,7 @@ class TCx(object):
         # Artisan is expecting either 2 or 4 temperatures
         chans = [self.c0, self.c1, self.c2, self.c3][:set34] + [None]
         self.dev_dict['tcs'] = [chans[i] for i in self.chan_idx] # reordering
-        logger.info(f'Initialized: {self.cmd}, ADC channels: {self.chan_idx}')
+        logger.info(f'{time.time()}:{self.cmd}:{self.chan_idx}')
         self.ser.write(b'#')
         self.handle_READ()
 
@@ -117,7 +118,7 @@ class TCx(object):
         Command of type: UNITS;C
         '''
         self.units = self.cmd[1]
-        logger.info(f'Units: {self.units}')
+        logger.info(f'{time.time()}:{self.cmd}:{self.units}')
 
     def handle_OT1(self):
         '''Slow PWM eater control, 1 Hz
@@ -131,7 +132,7 @@ class TCx(object):
             self.OT1.on()
         else:
             self.OT1.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'OT1: {self.heater_duty}')
+        logger.info(f'{time.time()}:{self.cmd}:{self.heater_duty}')
 
     def handle_OT2(self):
         '''PWM AC fan cotrol, ZCD at IO2
@@ -146,7 +147,7 @@ class TCx(object):
             self.OT2.on()
         else:
             self.OT2.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'OT2: {self.fan_duty}')
+        logger.info(f'{time.time()}:{self.cmd}:{self.fan_duty}')
 
     def handle_IO2(self):
         '''For ZCD, TODO'''
@@ -159,23 +160,23 @@ class TCx(object):
             self.IO2.on()
         else:
             self.IO2.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'IO2: {duty}')
+        logger.info(f'{time.time()}:{self.cmd}:{self.dc_fan_duty}')
 
     def handle_IO3(self):
         '''For DC fan control, TODO
         Command of type: IO3;100
         '''
-        logger.info(f'IO3: {self.cmd[1]}')
+        logger.info(f'{time.time()}:{self.cmd}')
 
     def handle_BUTTON(self):
         '''Log Artisan button presses
         Command of type: BUTTON;START
         '''
-        logger.info(f'BUTTON: {self.cmd[1]}')
+        logger.info(f'{time.time()}:{self.cmd}')
         
     def handle_UNK(self):
         '''All other commands'''
-        logger.warning(f'Unknown command: {self.cmd}')
+        logger.warning(f'{time.time()}:{self.cmd}:UNKNOWN')
 
     def dofilter(self, temps):
         '''Simple IIR filter over all temperatures read:
@@ -189,7 +190,7 @@ class TCx(object):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level='INFO')
+    logging.basicConfig(filename='/home/pi/tcx.log', level='INFO')
     with serial.Serial('/dev/ttyS90') as ser:
         tc4 = TCx(ser, 1)
 
