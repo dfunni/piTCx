@@ -51,16 +51,18 @@ class MCP9800(object):
         self.res = resb << self.SHIFT_ADC_RES
         self.alert = 0b1100 << self.SHIFT_COMP_INTR
         self.shutdown = 0b1 << self.SHIFT_SHUTDOWN
-        try:
-            self.configure()
-        except:
-            time.sleep(1)
-            self.configure()
+        self.no_io = False
+        self.default_value = 20.0
+        self.configure()
 
     def configure(self, source='init'):
         config = self.oneshot | self.res | self.alert | self.shutdown
         logger.debug(f'configuration: {source} {config:#010b}')
-        self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
+        try:
+            self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
+        except:
+            logger.warning('TCx hardware not connected, using default amb')
+            self.no_io = True
 
     def convert(self):
         self.oneshot = 0b1 << self.SHIFT_ONE_SHOT # initial oneshot mode
@@ -94,6 +96,8 @@ class MCP9800(object):
         return data
 
     def read(self):
+        if self.no_io:
+            return self.default_value
         temp = self.read_register(self.REG_TEMP, 2)
         if len(temp) < 2:
             logger.warning("bad read" + bin(temp))

@@ -63,7 +63,10 @@ class MCP342x(object):
         self.mode = 0b0 << self.SHIFT_MODE
         self.rsln = 0b11 << self.SHIFT_RSLN
         self.gain = self.gain_map.get(pga, 8) << self.SHIFT_GAIN
+
+        self.no_io = False
         self.configure('init')
+
         self.pga = pga
         self.lsb = self.lsb_map[18]
         self.nbytes = self.nbytes_map[18]
@@ -78,7 +81,11 @@ class MCP342x(object):
     def configure(self, src):
         self.config = self.nrdy | self.chan | self.mode | self.rsln | self.gain
         logger.debug(f'configuring {hex(self.address)}: {src} {bin(self.config)}')
-        self.bus.write_byte(self.address, self.config)
+        try:
+            self.bus.write_byte(self.address, self.config)
+        except:
+            logger.warning("No bus, setting temps to 0")
+            self.no_io = True
 
     def convert(self):
         # No effect in continuous mode, initiates conversion in oneshot mode
@@ -141,6 +148,8 @@ class MCP342x(object):
         return voltage
 
     def convert_and_read(self, samples=None, **kwargs):
+        if self.no_io:
+            return ([.01] if samples is None else [.01]*samples)
         if samples is not None:
             r = [0] * samples
         for sn in ([0] if samples is None else range(samples)):

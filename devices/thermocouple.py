@@ -1,6 +1,7 @@
 import logging
 import time
 from numpy.polynomial.polynomial import polyval
+import numpy as np
 
 
 logger = logging.getLogger(__name__)
@@ -60,16 +61,16 @@ def read_temps(dev_dict, T_range='low'):
 
     amb.convert()
     reads = [(dev.convert_and_read(), dev.tc_type) for dev in used_tcs]
+    logger.debug(reads)
     if dly:
         time.sleep(dly)
     Tamb = amb.read()
     Ts_C = [Tamb]
-    j = 0
-    for tc in tcs:
+    for j, tc in enumerate(tcs):
         if tc != None:
-            v, t = reads[j]
-            Ts_C.append(round((v2c(v, t, 'low') + Tamb), 4))
-            j += 1
+            v, tc_type = reads[j]
+            #logger.debug(f'{v[0]} {v2c(v[0], tc_type, "low")}')
+            Ts_C.append(round((v2c(v[0], tc_type, 'low') + Tamb), 4))
         else:
             Ts_C.append(0)
 
