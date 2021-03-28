@@ -38,7 +38,8 @@ class TCx(object):
                              'IO2': self.handle_IO2,
                              'IO3': self.handle_IO3,
                              'FILT': self.handle_FILT,
-                             'BUTTON':self.handle_BUTTON,}
+                             'BUTTON': self.handle_BUTTON,
+                             'CHARGE': self.handle_CHARGE,}
 
         self.units = "C" # temperature units
         self.setting34 = False # TC channels 3/4 expected from Artisan
@@ -171,6 +172,12 @@ class TCx(object):
     def handle_BUTTON(self):
         '''Log Artisan button presses
         Command of type: BUTTON;START
+        '''
+        logger.info(f'{time.time()}:{self.cmd}')
+
+    def handle_CHARGE(self):
+        '''Log Artisan CHARGE press
+        Command of type: CHARGE
         '''
         logger.info(f'{time.time()}:{self.cmd}')
         
