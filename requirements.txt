@@ -1,6 +1,6 @@
 colorzero==1.1
 gpiozero==1.5.1
-numpy==1.19.3
+numpy==1.22
 pigpio==1.78
 pkg-resources==0.0.0
 pyserial==3.5
