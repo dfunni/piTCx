@@ -1,17 +1,23 @@
 import logging
 import time
 from numpy.polynomial.polynomial import polyval
-import numpy as np
 
 
 logger = logging.getLogger(__name__)
 
-temp_range = 'low'
 
-def v2c(v, tc_type, T_range):
+def v2c(v, tc_type, temp_range):
+    """Convert voltage reading to temperature in degrees Celcius.
 
-    K_inv = {
-        'neg': [0, 
+    Polynomial coefficients given for the following temperature /
+    voltage ranges:
+        neg: -200 to 0 C / -5.891 to 0 mV
+        low: 0 to 500 C / 0 to 20.644 mv
+        high: 500 to 1372 C / 20.644 to 54.886 mV
+    (https://srdata.nist.gov/its90/type_k/kcoefficients_inverse.html)
+    """
+    k_inv = {
+        'neg': [0,
                 2.5173462e1,
                 -1.1662878,
                 -1.0833638,
@@ -31,49 +37,64 @@ def v2c(v, tc_type, T_range):
                 1.057734e-6,
                 -1.052755e-8],
         'high': [-1.318058e2,
-                4.830222e1,
-                -1.646031,
-                5.464731e-2,
-                -9.650715e-4,
-                8.802193e-6,
-                -3.110810e-8],
+                 4.830222e1,
+                 -1.646031,
+                 5.464731e-2,
+                 -9.650715e-4,
+                 8.802193e-6,
+                 -3.110810e-8],
             }
 
-    coef_inv = {'k_type': K_inv}
+    coef_inv = {'k_type': k_inv}
 
-    coefs = coef_inv.get(tc_type, K_inv)
-    coefs = coefs.get(T_range, 'low')
-    
+    coefs = coef_inv.get(tc_type, k_inv)
+    coefs = coefs.get(temp_range, 'low')
+
     return polyval(v*1000, coefs)
 
 
-def C_to_F(degCs):
-    return [round(reading*1.8 + 32, 2) for reading in degCs]
-    
-def read_temps(dev_dict, T_range='low'): 
+def c_to_f(temps_c):
+    """Convert Celcius to Fahrenheit.
+
+    Args:
+        temps_c (list of floats): temperature readings in Celcius
+    """
+    return [round(reading*1.8 + 32, 2) for reading in temps_c]
+
+
+def read_temps(dev_dict, temp_range='low'):
+    """
+
+    This code separates the MCP9800 convert and read functions to
+    allow for simultanoius conversion of the MCP9800 and MCP342x.
+
+    Returns:
+        (temperaturs returned as a list of [ambient, tc0, tc1, tc2, tc3])
+        temps_c (list of floats): temperatures in Celcius.
+        temps_f (list of floats): temperatures in Fahrenheit.
+        dly (float): the maximum conversion period between devices.
+    """
 
     amb = dev_dict.get('amb')
     tcs = dev_dict.get('tcs')
-    used_tcs = [i for i in tcs if i != None]
+    used_tcs = [i for i in tcs if i is not None]
 
     tc_convert_time = len(used_tcs) * used_tcs[0].convert_time
     dly = max(amb.convert_time - tc_convert_time, 0)
 
-    amb.convert()
+    amb.one_shot_conversion()  # start the MCP9800 conversion first
     reads = [(dev.convert_and_read(), dev.tc_type) for dev in used_tcs]
     logger.debug(reads)
     if dly:
         time.sleep(dly)
-    Tamb = amb.read()
-    Ts_C = [Tamb]
+    temp_amb = amb.read()  # read the MCP9800 register after sample period
+    temps_c = [temp_amb]
     for j, tc in enumerate(tcs):
-        if tc != None:
+        if tc is not None:
             v, tc_type = reads[j]
-            #logger.debug(f'{v[0]} {v2c(v[0], tc_type, "low")}')
-            Ts_C.append(round((v2c(v[0], tc_type, 'low') + Tamb), 4))
+            temps_c.append(round((v2c(v, tc_type, temp_range) + temp_amb), 4))
         else:
-            Ts_C.append(0)
+            temps_c.append(0)
 
-    Ts_F = C_to_F(Ts_C)
-    return Ts_C, Ts_F, dly
-
+    temps_f = c_to_f(temps_c)
+    return temps_c, temps_f, dly

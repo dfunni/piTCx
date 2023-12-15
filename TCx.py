@@ -1,7 +1,9 @@
+import os
+import logging
 import sys
 import serial
-import logging
-import time
+import yaml
+
 import smbus2 as smbus
 
 from gpiozero import PWMOutputDevice
@@ -9,174 +11,183 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 
 from devices import MCP342x, MCP9800
 from devices import thermocouple as tc
-import yaml
 
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
 
 class TCx(object):
+    """This is a class for the TCx Raspberry Pi HAT.
+    """
 
-    def __init__(self, ser, i2c_id, config='DEFAULT'):
+    def __init__(self, serial_bus):
+        """Initializes the TCx instance based on serial bus used.
+
+        Args:
+            serial_bus (serial.Serial): Defines the main communication bus.
+
+        """
 
         # ADC Setup
-        self.ser = ser
-        self.bus = smbus.SMBus(i2c_id)
+        self.serial_bus = serial_bus
+        self.i2c_bus = smbus.SMBus(bus=1)  # I2C bus 1 is always used with GPIO
 
-        self.amb = MCP9800(self.bus)
-        self.c0 = MCP342x(self.bus, chan=0, tc_type='k_type')
-        self.c1 = MCP342x(self.bus, chan=1, tc_type='k_type')
+        self.amb = MCP9800(bus=self.i2c_bus)
+        self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type')
+        self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type')
         self.c2 = None
         self.c3 = None
-        self.dev_dict = {'amb': self.amb,
-                         'tcs': []}
+        self.device_dict = {'amb': self.amb,
+                            'tcs': []}
 
-        self.handler_dict = {'READ': self.handle_READ,
-                             'CHAN': self.handle_CHAN,
-                             'UNITS': self.handle_UNITS,
-                             'OT1': self.handle_OT1,
-                             'OT2': self.handle_OT2,
-                             'IO2': self.handle_IO2,
-                             'IO3': self.handle_IO3,
-                             'FILT': self.handle_FILT,
-                             'BUTTON':self.handle_BUTTON,}
+        self.handler_dict = {'READ': self.handle_read,
+                             'CHAN': self.handle_chan,
+                             'UNITS': self.handle_units,
+                             'OT1': self.handle_ot1,
+                             'OT2': self.handle_ot2,
+                             'IO2': self.handle_io2,
+                             'IO3': self.handle_io3,
+                             'FILT': self.handle_filt,
+                             'BUTTON': self.handle_button,
+                             }
 
-        self.units = "C" # temperature units
-        self.setting34 = False # TC channels 3/4 expected from Artisan
-        self.isinit = False # ensure CHAN before READ
+        self.units = "C"  # temperature units
+        self.isinit = False  # ensure CHAN before READ
 
         # GPIO setup
-        with open("/home/pi/TCx/config.yml", 'r') as ymlfile:
-            cfg = yaml.load(ymlfile, Loader=yaml.FullLoader).get(config, 'DEFAULT')
-        self.OT1pin = cfg['pOT1']
-        self.OT2pin = cfg['pOT2']
-        self.IO2pin = cfg['pIO2']
+        with open("config.yml", 'r', encoding="utf-8") as file:
+            pins = yaml.load(file, Loader=yaml.FullLoader).get('PIN_CONFIG')
+
+        factory = PiGPIOFactory()
+        self.ot1 = PWMOutputDevice(pin=pins['pOT1'], pin_factory=factory)
+        self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
+        self.io2 = PWMOutputDevice(pin=pins['pIO2'], pin_factory=factory)
 
         self.heater_duty = 0
-        self.fan_duty = 100
+        self.fan_duty = 100  # assumption that fan is on to start
         self.dc_fan_duty = 0
-        factory = PiGPIOFactory()
-        self.OT1 = PWMOutputDevice(pin=self.OT1pin, pin_factory=factory)
-        self.OT2 = PWMOutputDevice(pin=self.OT2pin, pin_factory=factory)
-        self.IO2 = PWMOutputDevice(pin=self.IO2pin, pin_factory=factory)
 
         # variables for filter
         self.filt = [0] * 4
         self.prev_temps = [0] * 4
+        self.cmd = None  # initialize
+        self.chan_idx = []  # initialize
 
-    def handle_command(self, cmd):
+    def decode_command(self, cmd):
         '''Parses Artisan commands and takes appropriate action
         '''
         cmd = cmd.decode('utf-8').replace('\n', '')
         self.cmd = str(cmd).split(';')
-        action = self.handler_dict.get(self.cmd[0], self.handle_UNK)()
+        _ = self.handler_dict.get(self.cmd[0], self.handle_unknown)()
 
-    def handle_READ(self):
+    def handle_read(self):
         '''Reads thermocouple temps and sends output over serial
         Command of type: READ
         '''
         if self.isinit:
-            t0 = time.time()
-            T_Cs, T_Fs, dly  = tc.read_temps(self.dev_dict)
+            T_Cs, T_Fs, _ = tc.read_temps(self.device_dict)
             Ts = T_Fs if self.units == 'F' else T_Cs
             Ts = self.dofilter(Ts)
             AT = Ts[0]
+            if len(Ts[1:]) == 1:
+                Ts.append(0.0)
             T_str = ','.join([f'{T}' for T in Ts[1:]])
             HT = self.heater_duty
             FN = self.fan_duty
             SV = 0
-            temps = f'{AT},{T_str},{HT},{FN},{SV}'
-            self.ser.write(bytes(temps, 'ascii'))
-            logger.info(f'{time.time()}:{self.cmd}:{temps}')
-        else: # if CHAN command has not been read yet
-            pass
+            msg = f'{AT},{T_str},{HT},{FN},{SV}'
+            self.serial_bus.write(bytes(msg, 'ascii'))
+            logger.info('%s:%s', self.cmd, msg)
+        else:  # if CHAN command has not been read yet
+            logger.warning("READ before CHAN command")
 
-    def handle_FILT(self):
+    def handle_filt(self):
         '''Sets the filter values to a list of floats between 0 and 1
         Command of type: FILT;70;70;70;70
         '''
         filts = str(self.cmd[1]).split(',')
         self.filt = [int(i)/100.0 for i in filts]
-        logger.info(f'{time.time()}:{self.cmd}:{self.filt}') 
+        logger.info('%s:%s', self.cmd, self.filt)
 
-    def handle_CHAN(self):
+    def handle_chan(self):
         '''Initializes TC4, sets up channels for ET and BT
         Command of type: CHAN;1234
         '''
-        self.isinit = True 
-        self.chan_idx = [int(i)-1 for i in list(self.cmd[1])] # -1 if None
+        self.isinit = True
+        self.chan_idx = [int(i)-1 for i in list(self.cmd[1])]  # -1 if None
         set34 = -2 if self.chan_idx[2] == self.chan_idx[3] == -1 else None
-        self.chan_idx = self.chan_idx[:set34] # truncating if no ArduionoTC4_34
+        # truncate unused channels, i.e. artisan setup with no ArduinoTC4_34
+        self.chan_idx = [i for i in self.chan_idx if i != -1]
         # Artisan is expecting either 2 or 4 temperatures
         chans = [self.c0, self.c1, self.c2, self.c3][:set34] + [None]
-        self.dev_dict['tcs'] = [chans[i] for i in self.chan_idx] # reordering
-        logger.info(f'{time.time()}:{self.cmd}:{self.chan_idx}')
-        self.ser.write(b'#')
-        self.handle_READ()
+        self.device_dict['tcs'] = [chans[i] for i in self.chan_idx]  # reorder
+        logger.info('%s:%s', self.cmd, self.chan_idx)
+        self.serial_bus.write(b'#')
+        self.handle_read()
 
-    def handle_UNITS(self):
+    def handle_units(self):
         '''Sets temperature units.
         Command of type: UNITS;C
         '''
         self.units = self.cmd[1]
-        logger.info(f'{time.time()}:{self.cmd}:{self.units}')
+        logger.info('%s:%s', self.cmd, self.units)
 
-    def handle_OT1(self):
+    def handle_ot1(self):
         '''Slow PWM eater control, 1 Hz
         COmmand of type: OT1;100
         '''
         self.heater_duty = self.cmd[1]
         duty = float(self.heater_duty) / 100.0
         if duty == 0:
-            self.OT1.off()
+            self.ot1.off()
         elif duty == 1:
-            self.OT1.on()
+            self.ot1.on()
         else:
-            self.OT1.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'{time.time()}:{self.cmd}:{self.heater_duty}')
+            self.ot1.blink(on_time=duty, off_time=(1-duty), n=None)
+        logger.info('%s:%s', self.cmd, self.heater_duty)
 
-    def handle_OT2(self):
+    def handle_ot2(self):
         '''PWM AC fan cotrol, ZCD at IO2
         Command of type: OT2;100
         '''
         self.fan_duty = self.cmd[1]
         duty = float(self.fan_duty) / 100.0
-        self.OT2.blink(on_time=duty, off_time=(1-duty), n=None)
+        self.ot2.blink(on_time=duty, off_time=(1-duty), n=None)
         if duty == 0:
-            self.OT2.off()
+            self.ot2.off()
         elif duty == 1:
-            self.OT2.on()
+            self.ot2.on()
         else:
-            self.OT2.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'{time.time()}:{self.cmd}:{self.fan_duty}')
+            self.ot2.blink(on_time=duty, off_time=(1-duty), n=None)
+        logger.info('%s:%s', self.cmd, self.fan_duty)
 
-    def handle_IO2(self):
+    def handle_io2(self):
         '''For ZCD, TODO'''
         self.dc_fan_duty = self.cmd[1]
         duty = float(self.dc_fan_duty) / 100.0
-        self.IO2.blink(on_time=duty, off_time=(1-duty), n=None)
+        self.io2.blink(on_time=duty, off_time=(1-duty), n=None)
         if duty == 0:
-            self.IO2.off()
+            self.io2.off()
         elif duty == 1:
-            self.IO2.on()
+            self.io2.on()
         else:
-            self.IO2.blink(on_time=duty, off_time=(1-duty), n=None)
-        logger.info(f'{time.time()}:{self.cmd}:{self.dc_fan_duty}')
+            self.io2.blink(on_time=duty, off_time=(1-duty), n=None)
+        logger.info('%s:%s', self.cmd, self.dc_fan_duty)
 
-    def handle_IO3(self):
+    def handle_io3(self):
         '''For DC fan control, TODO
         Command of type: IO3;100
         '''
-        logger.info(f'{time.time()}:{self.cmd}')
+        logger.info(self.cmd)
 
-    def handle_BUTTON(self):
+    def handle_button(self):
         '''Log Artisan button presses
         Command of type: BUTTON;START
         '''
-        logger.info(f'{time.time()}:{self.cmd}')
-        
-    def handle_UNK(self):
+        logger.info(self.cmd)
+
+    def handle_unknown(self):
         '''All other commands'''
-        logger.warning(f'{time.time()}:{self.cmd}:UNKNOWN')
+        logger.warning('%s is not implemented yet', self.cmd)
 
     def dofilter(self, temps):
         '''Simple IIR filter over all temperatures read:
@@ -190,15 +201,22 @@ class TCx(object):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='/home/pi/tcx.log', level='INFO')
+    # prio = os.sched_get_priority_max(os.SCHED_FIFO)
+    # param = os.sched_param(prio)
+    # os.sched_setscheduler(0, os.SCHED_FIFO, param)
+    os.sched_setaffinity(0, {1})
+    with open("config.yml", 'r', encoding="utf-8") as ymlfile:
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+    logging.basicConfig(filename=config['LOG_FILE'],
+                        format=config['LOG_FORMAT'],
+                        datefmt=config['LOG_DATEFMT'],
+                        level=config['LOG_LEVEL'])
     with serial.Serial('/dev/ttyS90') as ser:
-        tc4 = TCx(ser, 1)
+        tc4 = TCx(ser)
 
-        while(True):
+        while True:
             try:
-                cmd = ser.readline()
-                tc4.handle_command(cmd)
+                command = ser.readline()
+                tc4.decode_command(command)
             except KeyboardInterrupt:
                 sys.exit()
-                
-                

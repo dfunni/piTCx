@@ -5,8 +5,8 @@ PTYc="readlink -f /dev/ttyS91"
 sleep 1
 sudo chmod 660 $PTYs
 sudo chmod 660 $PTYc 
-date >> $HOME/tcx.log
-cat $HOME/TCx/fig.txt >> $HOME/tcx.log
-source $HOME/TCx/env/bin/activate
-python $HOME/TCx/TCx.py &>> $HOME/tcx.log
+date >> tcx.log
+cat fig.txt >> tcx.log
+# source $HOME/TCx/env/bin/activate
+python $HOME/TCx/TCx.py &>> tcx.log
 

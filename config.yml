@@ -1,13 +1,22 @@
-DEFAULT:
+LOG_FILE: 'tcx.log'
+LOG_LEVEL: 'INFO'
+LOG_FORMAT: '%(asctime)s.%(msecs)03d  %(levelname)s  %(module)s - %(funcName)s: %(message)s'
+LOG_DATEFMT: '%Y%m%d %H:%M:%S'
+
+
+PIN_CONFIG:
+    EEPROM_SDA: 0 # required for HAT support
+    EEPROM_SCL: 1 # required for HAT support
+    ## DEFAULT PIN_CONFIG
     pOT1: 18
     pOT2: 17
     pIO2: 4
-PWM:
-    pOT1: 18
-    pOT2: 17
-    pIO2: 22
-PAC:
-    pOT1: 18
-    pOT2: 19
-    pIO2: 22
+    ## PWM PIN_CONFIG
+#     pOT1: 18
+#     pOT2: 17
+#     pIO2: 22
+    ## PAC PIN_CONFIG
+#     pOT1: 18
+#     pOT2: 19
+#     pIO2: 22
 
