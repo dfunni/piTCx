@@ -204,7 +204,7 @@ if __name__ == '__main__':
     # prio = os.sched_get_priority_max(os.SCHED_FIFO)
     # param = os.sched_param(prio)
     # os.sched_setscheduler(0, os.SCHED_FIFO, param)
-    os.sched_setaffinity(0, {1})
+    # os.sched_setaffinity(0, {0})
     with open("config.yml", 'r', encoding="utf-8") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
     logging.basicConfig(filename=config['LOG_FILE'],

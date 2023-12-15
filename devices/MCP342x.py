@@ -189,7 +189,7 @@ class MCP342x(object):
         return voltage
 
     def convert_and_read(self, samples=None, **kwargs):
-        """
+        """Runs one-shot conversion and reads values.
         """
         if self.no_io:
             return ([.01] if samples is None else [.01]*samples)
