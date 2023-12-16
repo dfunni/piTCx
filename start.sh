@@ -7,6 +7,6 @@ sudo chmod 660 $PTYs
 sudo chmod 660 $PTYc 
 date >> tcx.log
 cat fig.txt >> tcx.log
-# source $HOME/TCx/env/bin/activate
+source $HOME/TCx/env/bin/activate
 python $HOME/TCx/TCx.py &>> tcx.log
 

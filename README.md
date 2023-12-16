@@ -1,28 +1,41 @@
 # TCx
-TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope
-as front-end UI. A standalone Raspberry Pi can interface with any TCx board 
-(original TC4, TCsolo, or TCduo) to record temperatures from up to four
-thermocouples as well as the ambient temperature sensor (MCP9800) on the TCx board. 
-For roaster control, the Raspberry pi can perform heater control using slow PWM (1 Hz).
+TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A standalone Raspberry Pi can interface with any TCx board (original TC4, TCsolo, TCduo, or TC4 HAT+) to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the TCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control.
 
-Additionally, the Raspberry Pi can interface with an Arduino (3.3 V variant)
-using serial commands over GPIO pins 14 and 15 (Broadcom pins 8 and 10). This allows 
-for fast PWM control of heater as well as phase angle control of an AC
-fan. For PAC fan control, the Arduino hardware interrupt (DIO2) must be used to
-monitor zero cross detecting circuitry and control a random fire SSR on the TCx
-OT2 pin.
+## Raspberry Pi Setup
+Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
 
-# Raspberry Pi Setup
-## Serial communication setup
-1. Ensure hardware serial is enabled in raspi-config
-2. Stop the getty service for /dev/ttyAMA0
-```
-sudo systemctl disable serial-getty@ttyAMA0.service
-```
-3. Add the following line to the end of /boot/config.txt
-```
-dtoverlay=pi3-miniuart-bt
-```
+1. configure the raspi with
+    
+    sudo raspi-config
+    
+In the "Advanced" menu, select expand filesystem.
+
+In the "Interfaces" menu enable ssh, I2C, Serial Port, and Remote GPIO.
+
+Reboot to finish the configuration.
+
+2. Install required tools
+
+    sudo apt install socat
+
+3. Ensure gpiod is running
+
+    sudo systemctl start gpiod
+
+4. Install Artisan
+
+    curl -L -O https://github.com/artisan-roaster-scope/artisan/releases/download/<vx.xx.x>/<artisan-linux-x.xx.x.deb>
+    sudo dpkg -i <artisan-linux-x.x.x.deb>
+
+5. Download and setup the TCx code
+
+    git clone https://github.com/dfunni/TCx.git
+    cd TCx
+    python -m venv env
+    source env/bin/activate
+    pip install -r requirements.txt
+
+From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
 ## Launch start.sh on boot
 Edit crontab with:
