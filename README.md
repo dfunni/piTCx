@@ -15,13 +15,13 @@ In the "Interfaces" menu enable ssh, I2C, Serial Port, and Remote GPIO.
 Reboot to finish the configuration.
 
 2. Install required tools
-
-    `sudo apt install socat
-
+    ```
+    sudo apt install socat
+    ```
 3. Ensure gpiod is running
-
-    `sudo systemctl start gpiod
-
+    ```
+    sudo systemctl start gpiod
+    ```
 4. Install Artisan
     ```
     curl -L -O https://github.com/artisan-roaster-scope/artisan/releases/download/<vx.xx.x>/<artisan-linux-x.xx.x.deb>
