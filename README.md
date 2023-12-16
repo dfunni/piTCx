@@ -5,9 +5,9 @@ TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as
 Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
 
 1. configure the raspi with
-    
-    sudo raspi-config
-    
+```
+sudo raspi-config
+```    
 In the "Advanced" menu, select expand filesystem.
 
 In the "Interfaces" menu enable ssh, I2C, Serial Port, and Remote GPIO.
