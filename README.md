@@ -16,25 +16,25 @@ Reboot to finish the configuration.
 
 2. Install required tools
 
-    sudo apt install socat
+    `sudo apt install socat
 
 3. Ensure gpiod is running
 
-    sudo systemctl start gpiod
+    `sudo systemctl start gpiod
 
 4. Install Artisan
-
+    ```
     curl -L -O https://github.com/artisan-roaster-scope/artisan/releases/download/<vx.xx.x>/<artisan-linux-x.xx.x.deb>
     sudo dpkg -i <artisan-linux-x.x.x.deb>
-
+    ```
 5. Download and setup the TCx code
-
+    ```
     git clone https://github.com/dfunni/TCx.git
     cd TCx
     python -m venv env
     source env/bin/activate
     pip install -r requirements.txt
-
+    ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
 ## Launch start.sh on boot
