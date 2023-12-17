@@ -2,6 +2,7 @@ import logging
 import sys
 import serial
 import yaml
+from argparse import ArgumentParser
 
 import smbus2 as smbus
 
@@ -18,7 +19,7 @@ class TCx(object):
     """This is a class for the TCx Raspberry Pi HAT.
     """
 
-    def __init__(self, serial_bus):
+    def __init__(self, serial_bus, config):
         """Initializes the TCx instance based on serial bus used.
 
         Args:
@@ -53,9 +54,7 @@ class TCx(object):
         self.isinit = False  # ensure CHAN before READ
 
         # GPIO setup
-        with open("config.yml", 'r', encoding="utf-8") as file:
-            pins = yaml.load(file, Loader=yaml.FullLoader).get('PIN_CONFIG')
-
+        pins = config['PIN_CONFIG']
         factory = PiGPIOFactory()
         self.ot1 = PWMOutputDevice(pin=pins['pOT1'], pin_factory=factory)
         self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
@@ -200,14 +199,20 @@ class TCx(object):
 
 
 if __name__ == '__main__':
-    with open("config.yml", 'r', encoding="utf-8") as ymlfile:
+    parser = ArgumentParser(description="Handles interfaces for TCx hardware.")
+    ArgumentParser()
+    parser.add_argument('user', metavar='USER', type=str,
+                        help='the user where TCx code is located')
+    args = parser.parse_args()
+    with open(f"/home/{args.user}/TCx/config.yml", 'r',
+              encoding="utf-8") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
     logging.basicConfig(filename=config['LOG_FILE'],
                         format=config['LOG_FORMAT'],
                         datefmt=config['LOG_DATEFMT'],
                         level=config['LOG_LEVEL'])
     with serial.Serial('/dev/ttyS90') as ser:
-        tc4 = TCx(ser)
+        tc4 = TCx(ser, config)
 
         while True:
             try:

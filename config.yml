@@ -1,8 +1,7 @@
-LOG_FILE: 'tcx.log'
+LOG_FILE: '/var/log/tcx.log'
 LOG_LEVEL: 'INFO'
 LOG_FORMAT: '%(asctime)s.%(msecs)03d  %(levelname)s  %(module)s - %(funcName)s: %(message)s'
 LOG_DATEFMT: '%Y%m%d %H:%M:%S'
-
 
 PIN_CONFIG:
     EEPROM_SDA: 0 # required for HAT support
@@ -11,12 +10,3 @@ PIN_CONFIG:
     pOT1: 18
     pOT2: 17
     pIO2: 4
-    ## FAST PWM PIN_CONFIG
-#     pOT1: 18
-#     pOT2: 17
-#     pIO2: 22
-    ## PHASE ANGLE CONTROL PIN_CONFIG
-#     pOT1: 18
-#     pOT2: 19
-#     pIO2: 22
-

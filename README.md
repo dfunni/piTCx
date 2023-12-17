@@ -18,9 +18,10 @@ Reboot to finish the configuration.
 ```
 sudo apt install socat
 ```
-3. Ensure gpiod is running
+3. Ensure pigpiod is enabled and running
 ```
-sudo systemctl start gpiod
+sudo systemctl enable pigpiod
+sudo systemctl start pigpiod
 ```
 4. Install Artisan
 ```
@@ -34,6 +35,11 @@ cd TCx
 python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
+```
+6. Create systemd service to run the TCx command interface
+```
+sudo cp tcxd.service /etc/systemd/system/
+sudo sytemctl enable tcxd.service
 ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 

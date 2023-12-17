@@ -1,0 +1,13 @@
+[Unit]
+Description=TCx service
+After=pigpiod.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/bin/bash /home/dfunni/TCx/start.sh dfunni
+
+[Install]
+WantedBy=multi-user.target

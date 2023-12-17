@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-# Microchip MCP9800 Temperature Sensor (I2C)
-# By Michal Ludvig <mludvig@logix.net.nz>
 import logging
 import time
 import smbus2 as smbus
