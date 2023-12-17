@@ -43,23 +43,14 @@ sudo sytemctl enable tcxd.service
 ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
-## Launch start.sh on boot
-Edit crontab with:
-
-    crontab -e
-
-and add the following line:
-
-    @reboot $HOME/TCx/start.sh
+## Artisan Setup
 
 ## Launch Artisan on boot
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
     sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
 
-# Artisan Setup
-
-# Testing TCx on standalone Raspberry Pi
+## Testing TCx on standalone Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section.
 2. Open two terminals.
