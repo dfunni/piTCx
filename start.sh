@@ -8,4 +8,4 @@ chmod 660 $PTYc
 date > /var/log/tcx.log
 cat /home/$1/TCx/fig.txt >> /var/log/tcx.log
 source /home/$1/TCx/env/bin/activate
-python /home/$1/TCx/TCx.py $1
+python /home/$1/TCx/src/TCx.py $1
