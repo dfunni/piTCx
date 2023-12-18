@@ -44,6 +44,39 @@ sudo sytemctl enable tcxd.service
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
 ## Artisan Setup
+1. Go to Config > Device
+    - at the top of the ET/BT tab check Control, Curves: BT, LCDs: ET and BT
+    - select TC4 radio button, set ET and BT channels, set AT Channel to None, deselect PID Firmware
+    - in the Extra Devices tab add the following:
+        ArduinoTC4_56; Label 1: Heater; Label 2: Fan; Curve 1: enable; Curve 2: enable
+        ArduinoTC4_78; Label 1: SV; Label 2: Ambient; LCD 2: enable; Curve 1: enable; Curve 2: enable
+
+2. In Ports set Comm Port to /dev/ttyS91 with 114200 8 N 1 0.8
+
+3. Config > Sampling set to 1.0 seconds, ignore the popup
+
+4. Config > Curves select BT Projection and set to linear
+
+5. Config > Events
+     - set Event Types 2 to Heater and have that as the only event tyupe slected
+     - set Default Buttons - DROP to Serial Command: OT1;0
+     - under the Buttons Tab add the following
+        Heater MAX; Type: Heater; Value: 100; Action: Serial Command; Documentation: OT1;{}
+        Heater Off; Type: Heater; Value: 0; Action: Serial Command; Documentation: OT1;{}
+        PID OFF; Type: Heater Value: 0; Action: Artisan Command; Documentation: PIDoff
+    - Sliders - Event: Heater; Action: Serial Command; Command: OT1;{}
+
+6. Config > Temperature > Celcius Mode
+
+7. Roast > Background
+    - show, BT selected
+    - Load background .alog file
+
+8. Control (Button)
+    - kp: 1.30
+    - ki: 0.06
+    - kd: 4.50
+    - Source: BT; Target - Positive: Heater; Set Value - Mode: Background; Set PID on CHARGE: enabled
 
 ## Launch Artisan on boot
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
