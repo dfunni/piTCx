@@ -34,8 +34,8 @@ class TCx(object):
         self.amb = MCP9800(bus=self.i2c_bus)
         self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type')
         self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type')
-        self.c2 = None
-        self.c3 = None
+        self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type')
+        self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type')
         self.device_dict = {'amb': self.amb,
                             'tcs': []}
 
@@ -109,15 +109,26 @@ class TCx(object):
     def handle_chan(self):
         '''Initializes TC4, sets up channels for ET and BT
         Command of type: CHAN;1234
+
+        - A 0 index means there is no channel assigned to that value.
+        - If Arduino_34 is not set the last two values will be 0 and we should
+        omit them from chans.
+        - Channel values from the command are reduced by one to index the
+        proper ADC channel.
+        Examples:
+        CHAN;0100 results from ET: None, BT: ADC channel 0, Arduino_34 off
+        CHAN;2134 results from ET: ADC channel 1, BT channel 2, Arduino_34 on
         '''
         self.isinit = True
         self.chan_idx = [int(i)-1 for i in list(self.cmd[1])]  # -1 if None
-        set34 = -2 if self.chan_idx[2] == self.chan_idx[3] == -1 else None
-        # truncate unused channels, i.e. artisan setup with no ArduinoTC4_34
-        self.chan_idx = [i for i in self.chan_idx if i != -1]
-        # Artisan is expecting either 2 or 4 temperatures
-        chans = [self.c0, self.c1, self.c2, self.c3][:set34] + [None]
-        self.device_dict['tcs'] = [chans[i] for i in self.chan_idx]  # reorder
+        # truncate unused channels if artisan setup with no ArduinoTC4_34
+        if self.cmd[1][-2:] == '00':
+            self.chan_idx = self.chan_idx[:-2]
+        # None is included in chans to be indexed by a -1, ie no tc selected
+        chans = [self.c0, self.c1, self.c2, self.c3, None]
+        logger.info(self.chan_idx)
+        self.device_dict['tcs'] = [chans[i] for i in self.chan_idx]
+        logger.info(self.device_dict['tcs'])
         logger.info('%s:%s', self.cmd, self.chan_idx)
         self.serial_bus.write(b'#')
         self.handle_read()

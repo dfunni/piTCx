@@ -78,7 +78,6 @@ def read_temps(dev_dict, temp_range='low'):
     amb = dev_dict.get('amb')
     tcs = dev_dict.get('tcs')
     used_tcs = [i for i in tcs if i is not None]
-
     tc_convert_time = len(used_tcs) * used_tcs[0].convert_time
     dly = max(amb.convert_time - tc_convert_time, 0)
 
@@ -89,12 +88,13 @@ def read_temps(dev_dict, temp_range='low'):
         time.sleep(dly)
     temp_amb = amb.read()  # read the MCP9800 register after sample period
     temps_c = [temp_amb]
-    for j, tc in enumerate(tcs):
+    j = 0  # iterating with external value for tcs[0] = None case
+    for tc in tcs:
         if tc is not None:
             v, tc_type = reads[j]
             temps_c.append(round((v2c(v, tc_type, temp_range) + temp_amb), 4))
+            j += 1
         else:
             temps_c.append(0)
-
     temps_f = c_to_f(temps_c)
     return temps_c, temps_f, dly
