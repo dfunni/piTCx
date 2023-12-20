@@ -32,10 +32,10 @@ class TCx(object):
         self.i2c_bus = smbus.SMBus(bus=1)  # I2C bus 1 is always used with GPIO
 
         self.amb = MCP9800(bus=self.i2c_bus)
-        self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type')
-        self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type')
-        self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type')
-        self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type')
+        self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type', res=16)
+        self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type', res=16)
+        self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type', res=16)
+        self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type', res=16)
         self.device_dict = {'amb': self.amb,
                             'tcs': []}
 
@@ -228,6 +228,7 @@ if __name__ == '__main__':
         while True:
             try:
                 command = ser.readline()
+                logger.debug(command)
                 tc4.decode_command(command)
             except KeyboardInterrupt:
                 sys.exit()

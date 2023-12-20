@@ -81,7 +81,7 @@ class MCP342x(object):
         self.nrdy = 0b0 << self.SHIFT_NRDY
         self.chan = chan << self.SHIFT_CHAN
         self.mode = 0b0 << self.SHIFT_MODE  # initialize to one-shot
-        self.rsln = 0b11 << self.SHIFT_RSLN
+        self.rsln = self.rsln_map.get(res, 18) << self.SHIFT_RSLN
         self.gain = self.gain_map.get(pga, 8) << self.SHIFT_GAIN
 
         self.no_io = False
