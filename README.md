@@ -51,9 +51,9 @@ From here everything is setup and ready. The next steps are to configure Artisan
         ArduinoTC4_56; Label 1: Heater; Label 2: Fan; Curve 1: enable; Curve 2: enable
         ArduinoTC4_78; Label 1: SV; Label 2: Ambient; LCD 2: enable; Curve 1: enable; Curve 2: enable
 
-2. In Ports set Comm Port to /dev/ttyS91 with 114200 8 N 1 0.8
+2. In Ports set Comm Port to /dev/ttyS91 with 115200-8-N-1 and change the serial Timeout to **0.4** seconds
 
-3. Config > Sampling set to 1.0 seconds, ignore the popup
+3. Config > Sampling set to 1.0 seconds, accept the popup
 
 4. Config > Curves select BT Projection and set to linear
 
