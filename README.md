@@ -1,5 +1,5 @@
-# TCx
-TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A standalone Raspberry Pi can interface with any TCx board (original TC4, TCsolo, TCduo, or TC4 HAT+) to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the TCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control.
+# piTCx
+piTCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A standalone Raspberry Pi can interface with any TCx board (original TC4, TCsolo, TCduo, or TCx Power HAT+) to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the piTCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control.
 
 ## Raspberry Pi Setup
 Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
