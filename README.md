@@ -1,46 +1,89 @@
-# TCx
-TCx is a Raspberry Pi based roaster control system using Artisan Roasterscope
-as front-end UI. A standalone Raspberry Pi can interface with any TCx board 
-(original TC4, TCsolo, or TCduo) to record temperatures from up to four
-thermocouples as well as the ambient temperature sensor (MCP9800) on the TCx board. 
-For roaster control, the Raspberry pi can perform heater control using slow PWM (1 Hz).
+# piTCx
+piTCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A standalone Raspberry Pi can interface with any TCx board (original TC4, TCsolo, TCduo, or TCx Power HAT+) to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the piTCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control.
 
-Additionally, the Raspberry Pi can interface with an Arduino (3.3 V variant)
-using serial commands over GPIO pins 14 and 15 (Broadcom pins 8 and 10). This allows 
-for fast PWM control of heater as well as phase angle control of an AC
-fan. For PAC fan control, the Arduino hardware interrupt (DIO2) must be used to
-monitor zero cross detecting circuitry and control a random fire SSR on the TCx
-OT2 pin.
+## Raspberry Pi Setup
+Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
 
-# Raspberry Pi Setup
-## Serial communication setup
-1. Ensure hardware serial is enabled in raspi-config
-2. Stop the getty service for /dev/ttyAMA0
+1. configure the raspi with
 ```
-sudo systemctl disable serial-getty@ttyAMA0.service
+sudo raspi-config
+```    
+In the "Advanced" menu, select expand filesystem.
+
+In the "Interfaces" menu enable ssh, I2C, Serial Port, and Remote GPIO.
+
+Reboot to finish the configuration.
+
+2. Install required tools
 ```
-3. Add the following line to the end of /boot/config.txt
+sudo apt install socat
 ```
-dtoverlay=pi3-miniuart-bt
+3. Ensure pigpiod is enabled and running
 ```
+sudo systemctl enable pigpiod
+sudo systemctl start pigpiod
+```
+4. Install Artisan
+```
+curl -L -O https://github.com/artisan-roaster-scope/artisan/releases/download/<vx.xx.x>/<artisan-linux-x.xx.x.deb>
+sudo dpkg -i <artisan-linux-x.x.x.deb>
+```
+5. Download and setup the TCx code
+```
+git clone https://github.com/dfunni/TCx.git
+cd TCx
+python -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
+6. Create systemd service to run the TCx command interface
+```
+sudo cp tcxd.service /etc/systemd/system/
+sudo sytemctl enable tcxd.service
+```
+From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
-## Launch start.sh on boot
-Edit crontab with:
+## Artisan Setup
+1. Go to Config > Device
+    - at the top of the ET/BT tab check Control, Curves: BT, LCDs: ET and BT
+    - select TC4 radio button, set ET and BT channels, set AT Channel to None, deselect PID Firmware
+    - in the Extra Devices tab add the following:
+        ArduinoTC4_56; Label 1: Heater; Label 2: Fan; Curve 1: enable; Curve 2: enable
+        ArduinoTC4_78; Label 1: SV; Label 2: Ambient; LCD 2: enable; Curve 1: enable; Curve 2: enable
 
-    crontab -e
+2. In Ports set Comm Port to /dev/ttyS91 with 115200-8-N-1 and change the serial Timeout to **0.4** seconds
 
-and add the following line:
+3. Config > Sampling set to 1.0 seconds, accept the popup
 
-    @reboot $HOME/TCx/start.sh
+4. Config > Curves select BT Projection and set to linear
+
+5. Config > Events
+     - set Event Types 2 to Heater and have that as the only event tyupe slected
+     - set Default Buttons - DROP to Serial Command: OT1;0
+     - under the Buttons Tab add the following
+        Heater MAX; Type: Heater; Value: 100; Action: Serial Command; Documentation: OT1;{}
+        Heater Off; Type: Heater; Value: 0; Action: Serial Command; Documentation: OT1;{}
+        PID OFF; Type: Heater Value: 0; Action: Artisan Command; Documentation: PIDoff
+    - Sliders - Event: Heater; Action: Serial Command; Command: OT1;{}
+
+6. Config > Temperature > Celcius Mode
+
+7. Roast > Background
+    - show, BT selected
+    - Load background .alog file
+
+8. Control (Button)
+    - kp: 1.30
+    - ki: 0.06
+    - kd: 4.50
+    - Source: BT; Target - Positive: Heater; Set Value - Mode: Background; Set PID on CHARGE: enabled
 
 ## Launch Artisan on boot
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
     sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
 
-# Artisan Setup
-
-# Testing TCx on standalone Raspberry Pi
+## Testing TCx on standalone Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section.
 2. Open two terminals.
