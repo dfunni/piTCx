@@ -57,8 +57,8 @@ class TCx(object):
         pins = config['PIN_CONFIG']
         factory = PiGPIOFactory()
         self.ot1 = PWMOutputDevice(pin=pins['pOT1'], pin_factory=factory)
-        self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
-        self.io2 = PWMOutputDevice(pin=pins['pIO2'], pin_factory=factory)
+        # self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
+        # self.io2 = PWMOutputDevice(pin=pins['pIO2'], pin_factory=factory)
 
         self.heater_duty = 0
         self.fan_duty = 100  # assumption that fan is on to start
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('user', metavar='USER', type=str,
                         help='the user where TCx code is located')
     args = parser.parse_args()
-    with open(f"/home/{args.user}/TCx/config.yml", 'r',
+    with open(f"/home/{args.user}/piTCx/config.yml", 'r',
               encoding="utf-8") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
     logging.basicConfig(filename=config['LOG_FILE'],

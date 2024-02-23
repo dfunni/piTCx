@@ -1,5 +1,8 @@
 # piTCx
-piTCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A standalone Raspberry Pi can interface with any TCx board (original TC4, TCsolo, TCduo, or TCx Power HAT+) to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the piTCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control.
+piTCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A Raspberry Pi can interface with the piTCx Power HAT+ to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the piTCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control. Heater control requires a solid state relay connected to the OT1 jumper on the piTCx HAT+. The piTCx Power HAT+ can also power the host Raspberry Pi over GPIO through the 5V jumper connection.
+
+# piRoast Power
+The piRoast Power is a complementary board provides  5V power to supply the Raspberry Pi via the piTCx Power HAT+. Additionally, the board contains a solid state relay for heater control.
 
 ## Raspberry Pi Setup
 Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
@@ -28,15 +31,15 @@ sudo systemctl start pigpiod
 curl -L -O https://github.com/artisan-roaster-scope/artisan/releases/download/<vx.xx.x>/<artisan-linux-x.xx.x.deb>
 sudo dpkg -i <artisan-linux-x.x.x.deb>
 ```
-5. Download and setup the TCx code
+5. Download and setup the piTCx code
 ```
-git clone https://github.com/dfunni/TCx.git
-cd TCx
+git clone https://github.com/dfunni/piTCx.git
+cd piTCx
 python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
-6. Create systemd service to run the TCx command interface
+6. Create systemd service to run the piTCx command interface
 ```
 sudo cp tcxd.service /etc/systemd/system/
 sudo sytemctl enable tcxd.service
@@ -81,21 +84,21 @@ From here everything is setup and ready. The next steps are to configure Artisan
 ## Launch Artisan on boot
 Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
-    sudo cp $HOME/TCx/start_artisan.sh /etc/profile.d/
+    sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
 
-## Testing TCx on standalone Raspberry Pi
+## Testing piTCx on standalone Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section.
 2. Open two terminals.
-3. In the first terminal, navigate to the .../TCx/test/ directory and run:
+3. In the first terminal, navigate to the .../piTCx/test/ directory and run:
 ```
 ./start_test.sh
 ```
-4. In the second termial, navigate the the .../TCx/test/ directory and run:
+4. In the second termial, navigate the the .../piTCx/test/ directory and run:
 ```
 ./test.sh
 ```
-to initiate a default test of the full functionality of the TCx software.
+to initiate a default test of the full functionality of the piTCx software.
 Alternately, a single Artisan command can be executed with:
 ```
 ./ArtisonCMD.sh <command> [<value>]
@@ -103,7 +106,7 @@ Alternately, a single Artisan command can be executed with:
  using a command value pair from the following:
 | command | value | notes |
 | ------- | ----- | ----- |
-| CHAN    | 1234  | Initializes the TCx and sets order of ADC channels |
+| CHAN    | 1234  | Initializes the piTCx and sets order of ADC channels |
 | READ    |       | No value for READ command |
 | UNITS   | F/C   | Temperature units to be read |
 | OT1     | 0-100 | Sets OT1 duty cycle |
