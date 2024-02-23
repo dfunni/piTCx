@@ -39,7 +39,7 @@ python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
-6. Create systemd service to run the piTCx command interface. First update tcxd.service <user> fields to the correct login user (e.g. pi). Then:
+6. Create systemd service to run the piTCx command interface. First update tcxd.service line 10 to the correct login user (e.g. pi). Then:
 ```
 sudo cp tcxd.service /etc/systemd/system/
 sudo sytemctl enable tcxd.service
