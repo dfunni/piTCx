@@ -92,21 +92,27 @@ Copy `start_artisan.sh` to `/etc/profile.d/` with:
 
 ## Testing piTCx on standalone Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
-  section.
-2. Run pytests with:
+  section. Ensure piTCx HAT+ is connected.
+
+3. In the ~/piTCx directory run pytests with:
 ```
+cd ~/piTCx
 pytest --cov
 ```
-3. Navigate to the .../piTCx/tests/ directory and run:
+
+3. Navigate to the ~/piTCx/tests/ directory and run:
 ```
+cd tests/
 ./integration_test.sh
 ```
 Monitor the output to ensure temperatures are read, no errors are produced.
+
 4. Run the sample rate test to ensure 1.0 second sampling intervals are working:
 ```
 ./samprate_test.sh
 ```
 Monitor the output to esure 10 reads are taken. Check the timestamps for 1 second accuracy. 
+
 5. Additionally, a single Artisan command can be executed with:
 ```
 ./ArtisonCMD.sh <command> [<value>]
