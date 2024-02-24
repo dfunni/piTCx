@@ -67,15 +67,16 @@ class MCP9800(object):
         self.shutdown = 0b1 << self.SHIFT_SHUTDOWN  # initialize 1 for 1shot
         self.no_io = False
         self.default_value = 20.0
+        self.config = 0b0
         self.configure()
 
     def configure(self, source='init'):
         """Sets the sensor configuration register.
         """
-        config = self.oneshot | self.res | self.alert | self.shutdown
-        logger.debug('configuration: %s %s', source, format(config, '#010b'))
+        self.config = self.oneshot | self.res | self.alert | self.shutdown
+        logger.debug('configuration: %s %s', source, format(self.config, '#010b'))
         try:
-            self.bus.write_byte_data(self.address, self.REG_CONFIG, config)
+            self.bus.write_byte_data(self.address, self.REG_CONFIG, self.config)
         except IOError:
             logger.warning('TCx hardware not connected, using default amb')
             self.no_io = True
@@ -155,10 +156,10 @@ class MCP9800(object):
         return self.read()
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level='DEBUG')
-    i2c_bus = smbus.SMBus(bus=1)
-    mcp = MCP9800(i2c_bus)
-    data = mcp.read_register(MCP9800.REG_CONFIG)
-    print(f"config: {bin(data[0])}")
-    print("Temperature: %.1f", mcp.one_shot_read())
+# if __name__ == "__main__":
+#     logging.basicConfig(level='DEBUG')
+#     i2c_bus = smbus.SMBus(bus=1)
+#     mcp = MCP9800(i2c_bus)
+#     data = mcp.read_register(MCP9800.REG_CONFIG)
+#     print(f"config: {bin(data[0])}")
+#     print("Temperature: %.1f", mcp.one_shot_read())

@@ -57,8 +57,9 @@ class TCx(object):
         pins = config['PIN_CONFIG']
         factory = PiGPIOFactory()
         self.ot1 = PWMOutputDevice(pin=pins['pOT1'], pin_factory=factory)
-        # self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
-        # self.io2 = PWMOutputDevice(pin=pins['pIO2'], pin_factory=factory)
+        # the following interfaces are unused but kept for TC4 compatability
+        self.ot2 = PWMOutputDevice(pin=pins['pOT2'], pin_factory=factory)
+        self.io2 = PWMOutputDevice(pin=pins['pIO2'], pin_factory=factory)
 
         self.heater_duty = 0
         self.fan_duty = 100  # assumption that fan is on to start
