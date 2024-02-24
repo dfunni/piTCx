@@ -14,7 +14,6 @@ from devices import thermocouple as tc
 
 logger = logging.getLogger(__name__)
 
-
 class TCx(object):
     """This is a class for the TCx Raspberry Pi HAT.
     """
@@ -34,8 +33,10 @@ class TCx(object):
         self.amb = MCP9800(bus=self.i2c_bus)
         self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type', res=16)
         self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type', res=16)
+        # channels 2 and 3 only used for MCP3424
         self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type', res=16)
         self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type', res=16)
+        
         self.device_dict = {'amb': self.amb,
                             'tcs': []}
 
@@ -45,7 +46,6 @@ class TCx(object):
                              'OT1': self.handle_ot1,
                              'OT2': self.handle_ot2,
                              'IO2': self.handle_io2,
-                             'IO3': self.handle_io3,
                              'FILT': self.handle_filt,
                              'BUTTON': self.handle_button,
                              }
@@ -182,12 +182,6 @@ class TCx(object):
         else:
             self.io2.blink(on_time=duty, off_time=(1-duty), n=None)
         logger.info('%s:%s', self.cmd, self.dc_fan_duty)
-
-    def handle_io3(self):
-        '''For DC fan control, TODO
-        Command of type: IO3;100
-        '''
-        logger.info(self.cmd)
 
     def handle_button(self):
         '''Log Artisan button presses

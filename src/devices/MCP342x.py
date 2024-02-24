@@ -72,7 +72,7 @@ class MCP342x(object):
                  tc_type=None,
                  chan=0b00,
                  pga=8,
-                 res=18):
+                 res=16):
 
         self.bus = bus
         self.address = address
@@ -183,6 +183,7 @@ class MCP342x(object):
             c1 = bin(config_used)
             c2 = bin(self.config)
             logging.error('configuration error: %s != %s', c1, c2)
+            return -1
         if raw:
             return count
         voltage = count * self.lsb / self.pga
@@ -206,11 +207,11 @@ class MCP342x(object):
         return r
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level='DEBUG')
-    i2c_bus = smbus.SMBus(bus=1)
-    tc0 = MCP342x(i2c_bus)
-    for _ in range(5):
-        v = tc0.convert_and_read()
-        print(v)
-        time.sleep(1)
+# if __name__ == '__main__':
+#     logging.basicConfig(level='DEBUG')
+#     i2c_bus = smbus.SMBus(bus=1)
+#     tc0 = MCP342x(i2c_bus)
+#     for _ in range(5):
+#         v = tc0.convert_and_read()
+#         print(v)
+#         time.sleep(1)

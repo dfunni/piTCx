@@ -18,3 +18,4 @@ sleep 5
 ./ArtisanCMD.sh OT2 0 
 ./ArtisanCMD.sh IO2 0
 
+tail -n 22 /var/log/tcx.log

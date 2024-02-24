@@ -10,31 +10,44 @@ def test_init():
     assert dev.res is 0b11 << 5
     assert dev.config is 0b01111001
 
+def test_read_register():
+    config = dev.read_register(1)[0]
+    assert config is 0b01111001
+    config = dev.read_register(3)
+    assert len(config) is 2
+
 def test_one_shot_converstion():
     dev.one_shot_conversion()
-    assert dev.config is 0b11111001
+    config = dev.read_register(1)[0]
+    assert config is 0b11111001
     
 def test_set_oneshot():
     dev.set_oneshot(1)
-    assert dev.config is 0b11111001
+    config = dev.read_register(1)[0]
+    assert config is 0b11111001
     dev.set_oneshot(0)
-    assert dev.config is 0b01111001
+    config = dev.read_register(1)[0]
+    assert config is 0b01111001
 
 def test_set_resolution():
     dev.set_resolution(9)
-    assert dev.config is 0b00011001
+    config = dev.read_register(1)[0]
+    assert config is 0b00011001
     assert dev.res is 0b00 << 5
     assert dev.convert_time == 0.03
     dev.set_resolution(10)
-    assert dev.config is 0b00111001
+    config = dev.read_register(1)[0]
+    assert config is 0b00111001
     assert dev.res is 0b01 << 5
     assert dev.convert_time == 0.06
     dev.set_resolution(11)
-    assert dev.config is 0b01011001
+    config = dev.read_register(1)[0]
+    assert config is 0b01011001
     assert dev.res is 0b10 << 5
     assert dev.convert_time == 0.12
     dev.set_resolution(12)
-    assert dev.config is 0b01111001
+    config = dev.read_register(1)[0]
+    assert config is 0b01111001
     assert dev.res is 0b11 << 5
     assert dev.convert_time == 0.24
 
@@ -44,19 +57,20 @@ def test_set_alert():
     dev.set_alert(1, 1, 1)
     assert dev.alert is 0b01110
     dev.set_alert(3, 0, 0)
-    assert dev.config is 0b01111001
+    config = dev.read_register(1)[0]
+    assert config is 0b01111001
 
 def test_set_shutdown():
     dev.set_shutdown(0)
     assert dev.shutdown is 0b0
+    config = dev.read_register(1)[0]
+    assert config is 0b01111000
     dev.set_shutdown(1)
     assert dev.shutdown is 0b1
-
-def test_read_register():
     config = dev.read_register(1)[0]
     assert config is 0b01111001
-    config = dev.read_register(3)
-    assert len(config) is 2
+
+
 
 def test_read():
     temp = dev.read()
