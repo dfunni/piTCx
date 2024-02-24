@@ -5,3 +5,5 @@ do
     ./ArtisanCMD.sh READ &
     sleep 1
 done
+
+tail -n 11 /var/log/tcx.log
