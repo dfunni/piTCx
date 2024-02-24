@@ -1,8 +1,12 @@
 # piTCx
 piTCx is a Raspberry Pi based roaster control system using Artisan Roasterscope as front-end UI. A Raspberry Pi can interface with the piTCx Power HAT+ to record temperatures from up to four thermocouples as well as the temperature sensor (MCP9800) on the piTCx board. For roaster control, the Raspberry Pi can perform heater control using slow PWM (1 Hz) with the Artisan software providing PID control. Heater control requires a solid state relay connected to the OT1 jumper on the piTCx HAT+. The piTCx Power HAT+ can also power the host Raspberry Pi over GPIO through the 5V jumper connection.
 
+<img src="hardware/piTCx_HAT+/piTCx_Power_HAT+.png" width="500">
+
 # piRoast Power
 The piRoast Power is a complementary board provides  5V power to supply the Raspberry Pi via the piTCx Power HAT+. Additionally, the board contains a solid state relay for heater control.
+
+<img src="hardware/piRoast_Power/piRoast_Power.png" width="500">
 
 ## Raspberry Pi Setup
 Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
