@@ -1,6 +1,5 @@
 from src.devices import MCP342x
 import smbus2 as smbus
-import time
 
 i2c_bus = smbus.SMBus(bus=1)
 dev = MCP342x(i2c_bus)
