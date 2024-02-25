@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class MCP342x(object):
-    """Class to represent MCP342x ADC.
+    """Class to represent a single MCP342x ADC channel.
 
         configuration register:
                     x x x x x x x x
@@ -69,28 +69,27 @@ class MCP342x(object):
     def __init__(self,
                  bus,
                  address=0x68,
-                 tc_type=None,
                  chan=0b00,
-                 pga=8,
-                 res=16):
+                 res=16,
+                 pga=8):
 
         self.bus = bus
         self.address = address
-        self.tc_type = tc_type
         self.res = res
+        self.pga = pga
+        
         self.nrdy = 0b0 << self.SHIFT_NRDY
         self.chan = chan << self.SHIFT_CHAN
         self.mode = 0b0 << self.SHIFT_MODE  # initialize to one-shot
-        self.rsln = self.rsln_map.get(res, 18) << self.SHIFT_RSLN
+        self.rsln = self.rsln_map.get(res, 16) << self.SHIFT_RSLN
         self.gain = self.gain_map.get(pga, 8) << self.SHIFT_GAIN
 
         self.no_io = False
         self.configure('init')
-
-        self.pga = pga
-        self.lsb = self.lsb_map.get(res, 18)
-        self.nbytes = self.nbytes_map.get(res, 18)
-        self.convert_time = self.convert_map.get(res, 18)
+        
+        self.lsb = self.lsb_map.get(res, 16)
+        self.nbytes = self.nbytes_map.get(res, 16)
+        self.convert_time = self.convert_map.get(res, 16)
 
     def __repr__(self):
         """Representation of the class showing the address and channel
@@ -103,13 +102,13 @@ class MCP342x(object):
         """Set the configuration register.
         """
         self.config = self.nrdy | self.chan | self.mode | self.rsln | self.gain
-        logger.debug('configuring %s: %s %s',
+        logger.debug('%s: %s %s',
                      hex(self.address), src, format(self.config, '#010b'))
         try:
             self.bus.write_byte(self.address, self.config)
             logger.debug('%s-%s', src, format(self.config, '#010b'))
         except IOError:
-            logger.warning("I2C bus issue, setting temps to 0")
+            logger.warning('%s', "I2C bus issue, setting temps to 0")
             self.no_io = True
 
     def convert(self):

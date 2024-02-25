@@ -9,8 +9,9 @@ import smbus2 as smbus
 from gpiozero import PWMOutputDevice
 from gpiozero.pins.pigpio import PiGPIOFactory
 
-from devices import MCP342x, MCP9800
-from devices import thermocouple as tc
+from devices import MCP9800
+from devices import TC
+from utils import read_temps
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +32,11 @@ class TCx(object):
         self.i2c_bus = smbus.SMBus(bus=1)  # I2C bus 1 is always used with GPIO
 
         self.amb = MCP9800(bus=self.i2c_bus)
-        self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type', res=16)
-        self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type', res=16)
-        # channels 2 and 3 only used for MCP3424
-        self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type', res=16)
-        self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type', res=16)
+        # self.c0 = MCP342x(bus=self.i2c_bus, chan=0, tc_type='k_type', res=16)
+        # self.c1 = MCP342x(bus=self.i2c_bus, chan=1, tc_type='k_type', res=16)
+        # # channels 2 and 3 only used for MCP3424
+        # self.c2 = MCP342x(bus=self.i2c_bus, chan=2, tc_type='k_type', res=16)
+        # self.c3 = MCP342x(bus=self.i2c_bus, chan=3, tc_type='k_type', res=16)
         
         self.device_dict = {'amb': self.amb,
                             'tcs': []}
@@ -69,13 +70,14 @@ class TCx(object):
         self.filt = [0] * 4
         self.prev_temps = [0] * 4
         self.cmd = None  # initialize
-        self.chan_idx = []  # initialize
+        # self.chan_idx = []  # initialize
 
     def decode_command(self, cmd):
         '''Parses Artisan commands and takes appropriate action
         '''
         cmd = cmd.decode('utf-8').replace('\n', '')
         self.cmd = str(cmd).split(';')
+        logger.debug('%s', self.cmd)
         _ = self.handler_dict.get(self.cmd[0], self.handle_unknown)()
 
     def handle_read(self):
@@ -83,7 +85,8 @@ class TCx(object):
         Command of type: READ
         '''
         if self.isinit:
-            T_Cs, T_Fs, _ = tc.read_temps(self.device_dict)
+            T_Cs, T_Fs = read_temps(self.device_dict)
+            logger.debug('%s', T_Cs)
             Ts = T_Fs if self.units == 'F' else T_Cs
             Ts = self.dofilter(Ts)
             AT = Ts[0]
@@ -95,7 +98,7 @@ class TCx(object):
             SV = 0
             msg = f'{AT},{T_str},{HT},{FN},{SV}'
             self.serial_bus.write(bytes(msg, 'ascii'))
-            logger.info('%s:%s', self.cmd, msg)
+            logger.info('%s: %s', self.cmd, msg)
         else:  # if CHAN command has not been read yet
             logger.warning("READ before CHAN command")
 
@@ -118,19 +121,20 @@ class TCx(object):
         proper ADC channel.
         Examples:
         CHAN;0100 results from ET: None, BT: ADC channel 0, Arduino_34 off
-        CHAN;2134 results from ET: ADC channel 1, BT channel 2, Arduino_34 on
+        CHAN;2134 results from ET: ADC channel 1, BT channel 0, Arduino_34 on
         '''
         self.isinit = True
-        self.chan_idx = [int(i)-1 for i in list(self.cmd[1])]  # -1 if None
+        chans = self.cmd[1]
         # truncate unused channels if artisan setup with no ArduinoTC4_34
-        if self.cmd[1][-2:] == '00':
-            self.chan_idx = self.chan_idx[:-2]
-        # None is included in chans to be indexed by a -1, ie no tc selected
-        chans = [self.c0, self.c1, self.c2, self.c3, None]
-        logger.info(self.chan_idx)
-        self.device_dict['tcs'] = [chans[i] for i in self.chan_idx]
+        if chans[2:] == '00':
+            chans = chans[:2]
+        chan_setup = [int(i)-1 if i != '0' else None for i in chans]  # list of ints
+        
+        logger.debug('%s', chan_setup)
+        # instantiate thermocouples
+        self.device_dict['tcs'] = [None if ch == None else TC(self.i2c_bus, ch) for ch in chan_setup]
         logger.info(self.device_dict['tcs'])
-        logger.info('%s:%s', self.cmd, self.chan_idx)
+        logger.info('%s', self.cmd)
         self.serial_bus.write(b'#')
         self.handle_read()
 
@@ -198,10 +202,14 @@ class TCx(object):
                 y[k] = y[k-1]*f - x[k]*(1-f)
         where f is the filter value between 0 and 1
         '''
+        amb = temps[0]
+        temps = temps[1:]
+        self.prev_temps = self.prev_temps[:len(temps)]
+        self.filt = self.filt[:len(temps)]
         tmp = [self.prev_temps[i]*self.filt[i] for i, temp in enumerate(temps)]
-        y = [tmp[i] + temp*(1-self.filt[i]) for i, temp in enumerate(temps)]
+        y = [round(tmp[i] + temp*(1-self.filt[i]), 4) for i, temp in enumerate(temps)]
         self.prev_temps = y
-        return y
+        return [amb] + y
 
 
 if __name__ == '__main__':
@@ -217,13 +225,13 @@ if __name__ == '__main__':
                         format=config['LOG_FORMAT'],
                         datefmt=config['LOG_DATEFMT'],
                         level=config['LOG_LEVEL'])
-    with serial.Serial('/dev/ttyS90') as ser:
-        tc4 = TCx(ser, config)
+    with serial.Serial('/dev/ttyS90', 115200) as ser:
+        tcx = TCx(ser, config)
 
         while True:
             try:
                 command = ser.readline()
                 logger.debug(command)
-                tc4.decode_command(command)
+                tcx.decode_command(command)
             except KeyboardInterrupt:
                 sys.exit()

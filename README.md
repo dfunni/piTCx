@@ -58,7 +58,13 @@ From here everything is setup and ready. The next steps are to configure Artisan
         ArduinoTC4_56; Label 1: Heater; Label 2: Fan; Curve 1: enable; Curve 2: enable
         ArduinoTC4_78; Label 1: SV; Label 2: Ambient; LCD 2: enable; Curve 1: enable; Curve 2: enable
 
+<img src="docs/device.png" width="500">
+
+<img src="docs/extra_devices.png" width="500">
+
 2. In Ports set Comm Port to /dev/ttyS91 with 115200-8-N-1 and change the serial Timeout to **0.4** seconds
+
+<img src="docs/ports.png" width="500">
 
 3. Config > Sampling set to 1.0 seconds, accept the popup
 
@@ -73,6 +79,12 @@ From here everything is setup and ready. The next steps are to configure Artisan
         PID OFF; Type: Heater Value: 0; Action: Artisan Command; Documentation: PIDoff
     - Sliders - Event: Heater; Action: Serial Command; Command: OT1;{}
 
+    <img src="docs/events.png" width="500">
+
+    <img src="docs/buttons.png" width="500">
+
+    <img src="docs/sliders.png" width="500">
+
 6. Config > Temperature > Celcius Mode
 
 7. Roast > Background
@@ -84,6 +96,8 @@ From here everything is setup and ready. The next steps are to configure Artisan
     - ki: 0.06
     - kd: 4.50
     - Source: BT; Target - Positive: Heater; Set Value - Mode: Background; Set PID on CHARGE: enabled
+
+<img src="docs/control.png" width="500">
 
 ## Launch Artisan on boot
 Copy `start_artisan.sh` to `/etc/profile.d/` with:

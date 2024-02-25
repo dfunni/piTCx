@@ -1,6 +1,6 @@
 #!/bin/bash
 ./ArtisanCMD.sh CHAN 1200
-./ArtisanCMD.sh CHAN 1000
+./ArtisanCMD.sh CHAN 0100
 ./ArtisanCMD.sh OT1 50
 ./ArtisanCMD.sh OT2 50
 ./ArtisanCMD.sh IO2 50
@@ -18,4 +18,4 @@ sleep 5
 ./ArtisanCMD.sh OT2 0 
 ./ArtisanCMD.sh IO2 0
 
-tail -n 22 /var/log/tcx.log
+tail -n 38 /var/log/tcx.log

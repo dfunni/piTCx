@@ -1,5 +1,5 @@
 #!/bin/bash
-./ArtisanCMD.sh CHAN 1200
+./ArtisanCMD.sh CHAN 0100
 for ((i=0; i<10; i++))
 do
     ./ArtisanCMD.sh READ &
