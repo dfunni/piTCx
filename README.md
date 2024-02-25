@@ -104,7 +104,7 @@ sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
 
 <img src="docs/control.png" width="500">
 
-# Testing piTCx on standalone Raspberry Pi
+# Testing piTCx on Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section. Ensure piTCx HAT+ is connected.
 
