@@ -50,6 +50,11 @@ sudo sytemctl enable tcxd.service
 ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
+7. (Optional) Launch Artisan on boot
+Copy `start_artisan.sh` to `/etc/profile.d/` with:
+
+    sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
+
 # Artisan Setup
 1. Go to Config > Device
     - at the top of the ET/BT tab check Control, Curves: BT, LCDs: ET and BT
@@ -98,11 +103,6 @@ From here everything is setup and ready. The next steps are to configure Artisan
     - Source: BT; Target - Positive: Heater; Set Value - Mode: Background; Set PID on CHARGE: enabled
 
 <img src="docs/control.png" width="500">
-
-# Launch Artisan on boot
-Copy `start_artisan.sh` to `/etc/profile.d/` with:
-
-    sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
 
 # Testing piTCx on standalone Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
