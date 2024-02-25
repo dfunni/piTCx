@@ -84,11 +84,11 @@ sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
         PID OFF; Type: Heater Value: 0; Action: Artisan Command; Documentation: PIDoff
     - Sliders - Event: Heater; Action: Serial Command; Command: OT1;{}
 
-    <img src="docs/events.png" width="500">
+<img src="docs/events.png" width="500">
 
-    <img src="docs/buttons.png" width="500">
+<img src="docs/buttons.png" width="500">
 
-    <img src="docs/sliders.png" width="500">
+<img src="docs/sliders.png" width="500">
 
 6. Config > Temperature > Celcius Mode
 
