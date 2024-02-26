@@ -8,7 +8,7 @@ The piRoast Power is a complementary board provides  5V power to supply the Rasp
 
 <img src="hardware/piRoast_Power/piRoast_Power.png" width="500">
 
-## Raspberry Pi Setup
+# Raspberry Pi Setup
 Starting with a fresh install of the latest raspbian OS (tested with Bookworm):
 
 1. configure the raspi with
@@ -50,7 +50,12 @@ sudo sytemctl enable tcxd.service
 ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
-## Artisan Setup
+## (Optional) Launch Artisan on boot
+Copy `start_artisan.sh` to `/etc/profile.d/` with:
+```
+sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
+```
+# Artisan Setup
 1. Go to Config > Device
     - at the top of the ET/BT tab check Control, Curves: BT, LCDs: ET and BT
     - select TC4 radio button, set ET and BT channels, set AT Channel to None, deselect PID Firmware
@@ -79,11 +84,11 @@ From here everything is setup and ready. The next steps are to configure Artisan
         PID OFF; Type: Heater Value: 0; Action: Artisan Command; Documentation: PIDoff
     - Sliders - Event: Heater; Action: Serial Command; Command: OT1;{}
 
-    <img src="docs/events.png" width="500">
+<img src="docs/events.png" width="500">
 
-    <img src="docs/buttons.png" width="500">
+<img src="docs/buttons.png" width="500">
 
-    <img src="docs/sliders.png" width="500">
+<img src="docs/sliders.png" width="500">
 
 6. Config > Temperature > Celcius Mode
 
@@ -99,12 +104,7 @@ From here everything is setup and ready. The next steps are to configure Artisan
 
 <img src="docs/control.png" width="500">
 
-## Launch Artisan on boot
-Copy `start_artisan.sh` to `/etc/profile.d/` with:
-
-    sudo cp $HOME/piTCx/start_artisan.sh /etc/profile.d/
-
-## Testing piTCx on standalone Raspberry Pi
+# Testing piTCx on Raspberry Pi
 1. Ensure Raspberry Pi setup is completed per instructions in Raspberry Pi Setup
   section. Ensure piTCx HAT+ is connected.
 
