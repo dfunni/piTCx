@@ -7,6 +7,6 @@ PIN_CONFIG:
     EEPROM_SDA: 0 # required for HAT support
     EEPROM_SCL: 1 # required for HAT support
     ## DEFAULT PIN_CONFIG
-    pOT1: 17
-    pOT2: 18    # unused but kept for TC4 compatability
+    pOT1: 18
+    pOT2: 17    # unused but kept for TC4 compatability
     pIO2: 4     # unused but kept for TC4 compatability
