@@ -46,7 +46,7 @@ pip install -r requirements.txt
 6. Create systemd service to run the piTCx command interface. First update tcxd.service line 10 to the correct login user (e.g. pi). Then:
 ```
 sudo cp tcxd.service /etc/systemd/system/
-sudo sytemctl enable tcxd.service
+sudo systemctl enable tcxd.service
 ```
 From here everything is setup and ready. The next steps are to configure Artisan for communication with the TCx board.
 
